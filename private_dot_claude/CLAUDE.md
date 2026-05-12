@@ -24,6 +24,12 @@
 - Secrets read from env or secret manager. No hardcoded credentials, no secrets in logs, no secrets in error responses.
 - Error responses to clients must not echo internal details: no stack traces, no raw SQL errors, no internal paths, no library versions.
 
+## Robustness
+
+- Trust the compiler. The borrow / type / lifetime checker proves invariants at compile time — don't duplicate them with runtime `if x.is_none()` fallbacks. Express impossibility in the type, not in match arms.
+- Errors propagate to a boundary (main / HTTP handler / CLI entry / Tauri command / MCP tool entry) via `?` and are handled there once. Mid-pipeline `match err { Err(_) => default_value }` is a bug, not error handling.
+- `#[allow(...)]` / `// eslint-disable-*` / `# noqa` / `# type: ignore` / `@ts-ignore` are anaesthetic, not fixes. Resolve the root cause (delete dead code, actually use the variable, narrow the type, fix the schema). Already-excepted: FFI with explanation comment.
+
 ## Tool Usage
 
 - File search: Glob, not find/ls.
@@ -45,6 +51,7 @@
 - Rule of Three for abstractions: 1 occurrence → just write it; 2 occurrences → tolerate duplication; ≥3 occurrences → consider extraction. Never abstract on the second occurrence.
 - When unsure, default to inline. The repair for a wrong abstraction is to inline it back to call sites, then re-evaluate — not to add another parameter.
 - No speculative `pub`/`export`. A new public item must have a real caller in the same commit. No caller → delete or keep private. Exception: library crates / published packages whose public API is the deliverable.
+- Prefer explicit field listing over `..Default::default()` — making fields explicit causes future additions to surface as compile errors.
 
 ## Comments
 
@@ -69,7 +76,7 @@ Post-change order:
    - Frontend: the repo's package manager lint, typecheck, build scripts
 3. Verify in browser after frontend changes. Build passing is not enough.
 
-Zero warnings policy: fix at the root. Never suppress with `#[allow(...)]` unless FFI with explanation attached.
+Zero warnings policy: fix at the root.
 
 ## Frontend
 
