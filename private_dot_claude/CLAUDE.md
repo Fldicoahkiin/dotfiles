@@ -9,7 +9,7 @@
 
 - Respond in Chinese throughout.
 - Keep proper nouns in English: API, CLI, JSON, shell, prompt, tool, etc.
-- Engineer tone: direct, calm, precise. No hype, no self-congratulation.
+- Engineer tone: direct, calm, precise. Banned words in replies, comments, commit messages, PR descriptions: "critical", "essential", "comprehensive", "robust", "seamless", "powerful", "elegant", "leverage", "delve", "in conclusion". Chinese: 「至关重要」「核心」「全面」「强大」「优雅」「赋能」「打磨」「精心」.
 
 ## Safety
 
@@ -17,15 +17,34 @@
 - Never read credential dirs: `~/.ssh/`, `~/.aws/`, `~/.gnupg/`, etc.
 - For deletion, use `trash` or confirm before any destructive action.
 
+## Application Security
+
+- Validate external input at the system boundary before it reaches business logic. Untrusted input must never reach SQL, shell, `eval`, deserializers, or file paths unsanitized.
+- SQL / shell / template strings: parameterized queries and proper escaping only. No string concatenation with external values.
+- Secrets read from env or secret manager. No hardcoded credentials, no secrets in logs, no secrets in error responses.
+- Error responses to clients must not echo internal details: no stack traces, no raw SQL errors, no internal paths, no library versions.
+
+## Tool Usage
+
+- File search: Glob, not find/ls.
+- Content search: Grep, not grep/rg via Bash.
+- Read files: Read, not cat/head/tail.
+- Edit files: Edit, not sed/awk.
+- Write files: Write, not echo/heredoc.
+- Bash 仅用于真正需要 shell 执行的系统命令。
+
 ## Code Consistency
 
 - No simplification of features, data shape, or architecture intent without explicit approval.
 - Modify in-place. Never create renamed "new version" files or symbols.
 - Banned suffixes/prefixes: `_enhanced`, `_improved`, `_v2`, `_fixed`, `_new`, `_better`, `_optimized`, `_refactored`, and Chinese equivalents.
+- Banned generic names for new types/modules/functions: `Manager`, `Handler`, `Helper`, `Util`, `Service`, `Processor`, `Engine`, `Wrapper`, `Base*`, `Abstract*`. Use a name that says what the thing does in domain terms.
 - Domain-first naming. Preserve the project's established vocabulary.
 - No prompt artifacts in identifiers, comments, commit messages, or replies.
-- Magic numbers from domain knowledge: extract to named constants, add a comment on origin. Never discard.
-- No speculative abstractions. New abstractions must eliminate real duplication, not anticipated duplication.
+- Magic numbers from domain knowledge: extract to named constants, add a comment on origin. Never discard. Single-occurrence literals that aren't shared invariants stay inline with a comment for why — don't promote to a named constant prematurely.
+- Rule of Three for abstractions: 1 occurrence → just write it; 2 occurrences → tolerate duplication; ≥3 occurrences → consider extraction. Never abstract on the second occurrence.
+- When unsure, default to inline. The repair for a wrong abstraction is to inline it back to call sites, then re-evaluate — not to add another parameter.
+- No speculative `pub`/`export`. A new public item must have a real caller in the same commit. No caller → delete or keep private. Exception: library crates / published packages whose public API is the deliverable.
 
 ## Comments
 
@@ -67,6 +86,7 @@ Zero warnings policy: fix at the root. Never suppress with `#[allow(...)]` unles
 ## Git
 
 - Conventional Commits format.
+- One commit = one logical change that can be reverted independently. Mixed-concern commits must be split (`git add -p`).
 - Breaking changes: `!` after type, e.g. `refactor!: remove legacy module`.
 - Commit when ready; never add `Co-Authored-By` or any AI attribution to commit messages.
 - Never push unless explicitly asked.
