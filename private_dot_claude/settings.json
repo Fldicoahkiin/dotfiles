@@ -1,12 +1,6 @@
 {
   "env": {
-    "CLAUDE_CODE_DISABLE_TERMINAL_TITLE": "1",
-    "ANTHROPIC_BASE_URL": "https://token-plan-cn.xiaomimimo.com/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "tp-csndhpcalgh7gzgxrgd09dbf03j1y6ppg0vq7vgcjyil6fgc",
-    "ANTHROPIC_MODEL": "mimo-v2.5-pro",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "mimo-v2.5-pro",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "mimo-v2.5-pro",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "mimo-v2.5-pro"
+    "CLAUDE_CODE_DISABLE_TERMINAL_TITLE": "1"
   },
   "permissions": {
     "allow": [
@@ -108,7 +102,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "mimo-v2.5-pro",
+  "pluginConfig": {},
   "hooks": {
     "Notification": [
       {
@@ -279,6 +273,5 @@
   "autoUpdatesChannel": "stable",
   "theme": "dark",
   "editorMode": "vim",
-  "verbose": true,
-  "pluginConfig": {}
+  "verbose": true
 }
