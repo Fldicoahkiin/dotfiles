@@ -100,7 +100,7 @@
       "Bash(bun pm:*)",
       "mcp__pencil"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "hooks": {
     "Notification": [
@@ -224,7 +224,6 @@
     "command": "/Users/mac/.vibe-island/bin/vibe-island-statusline"
   },
   "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true,
     "supabase@claude-plugins-official": false,
     "chrome-devtools-mcp@claude-plugins-official": true,
     "remember@claude-plugins-official": false,
@@ -259,7 +258,8 @@
     "swift-lsp@claude-plugins-official": true,
     "sonatype-guide@claude-plugins-official": false,
     "frontend-design@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
   "language": "中文",
@@ -267,6 +267,7 @@
   "theme": "dark",
   "editorMode": "vim",
   "verbose": true,
+  "skipAutoPermissionPrompt": true,
   "pluginConfig": {},
   "enableWorkflows": false
 }
