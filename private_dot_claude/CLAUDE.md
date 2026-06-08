@@ -9,7 +9,7 @@
 
 - Think first: state assumptions; surface competing interpretations instead of silently picking one; push back when a simpler way exists; unclear → stop, name what's confusing, ask. Trivial tasks: skip the ceremony.
 - Surgical: every changed line traces to the request. Don't touch adjacent code or formatting; match existing style even if you'd do it differently. Unrelated dead code → mention, don't delete. Remove only orphans your own change created.
-- Goal-driven: turn vague tasks into verifiable criteria (bug fix = a failing repro test, then made to pass); loop until they hold.
+- Goal-driven: turn vague tasks into verifiable criteria; every bug fix starts with a failing repro test, then made to pass; loop until they hold. Multi-step tasks: state a brief plan, each step paired with its verify check (`step → verify`).
 
 ## Simplicity First
 
