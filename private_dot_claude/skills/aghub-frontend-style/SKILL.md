@@ -33,7 +33,7 @@ bun run lint          # eslint --fix（@antfu + @eslint-react + better-tailwindc
 ## React 19 与 effect 纪律
 
 - **取数不用 `useEffect`**，用 react-query。**派生状态不用 effect**，用 `useMemo` 在 render 期算。**事件**命名 `handleXxx`。
-- `useEffect` 只留给真正的外部订阅：`invoke` 启后台服务、`window.addEventListener`/`matchMedia`、deep-link、driver.js——且都返回 cleanup。全仓 effect 仅 ~35 处，集中在 providers / onboarding / window-controls。
+- `useEffect` 只留给真正的外部订阅：`invoke` 启后台服务、`window.addEventListener`/`matchMedia`、deep-link、driver.js——且都返回 cleanup。
 - 需要重置子状态时，优先 **lazy initial state**（`useState(() => ...)`）+ 父层给组件加 `key={...}` 重挂载，而不是 effect 同步。
 - 复杂多态状态用 `useReducer`，别堆一堆相互依赖的 `useState`。
 - context：`contexts/<name>.tsx` 放 `createContext` + value 类型 + props 类型 + 抛错守卫 `useXxxContext`；`providers/<name>.tsx` 放实际 Provider。用 React 19 写法：`use(Context)` 取值、context 直接当 provider（`<ServerContext value={...}>`，**不写 `.Provider`**）。
@@ -42,7 +42,7 @@ bun run lint          # eslint --fix（@antfu + @eslint-react + better-tailwindc
 
 ## 状态与持久化
 
-- 持久化用 Tauri `@tauri-apps/plugin-store`，**不用 zustand/immer**（全仓 0 处 zustand）。`src/lib/store/index.ts` 单例 `Store.load("store.json")`；每个 slice 一个文件导出 async `getXxx/saveXxx`，写完 `await s.save()`。
+- 持久化用 Tauri `@tauri-apps/plugin-store`，**不用 zustand/immer**。`src/lib/store/index.ts` 单例 `Store.load("store.json")`；每个 slice 一个文件导出 async `getXxx/saveXxx`，写完 `await s.save()`。
 - `src/lib/store.ts` 是 **barrel**，re-export `lib/store/*` 各 slice；消费方统一 `from "../lib/store"` 引多个 `getXxx/saveXxx`，不直接 import 具体 slice 文件。新 slice 记得挂到 barrel。
 - store 结构变更必须加版本迁移：`src/lib/store/migrations/vN-to-vN+1.ts` 一支一文件，`migrations/index.ts` 按 `version <` 串行执行，更新 `store/types.ts` 的 `CURRENT_VERSION`。
 - URL 状态用 nuqs `useQueryState`（选中项、tab 放 query string）。`NuqsAdapter` 已在 `App.tsx` 挂好。
@@ -54,15 +54,15 @@ bun run lint          # eslint --fix（@antfu + @eslint-react + better-tailwindc
 - 做任何 UI 前先取 HeroUI v3 API：用 `heroui-react` skill（`.heroui-docs/` 本地可能缺失，别依赖它）。你记忆里的 HeroUI v2 知识对本项目是错的。
 - 全部用 **compound components**（点号子组件）：`Modal.Backdrop/Container/Dialog/Header/Heading/Body/Footer`、`Card.Content/Title/Description`、`Tabs.List/Tab/Indicator/Panel`、`Switch.Control/Thumb`、`Tooltip.Trigger/Content`。不用 v2 的 flat props，不需要 `HeroUIProvider`，不用 framer-motion。
 - Modal / Card / Surface / Input / 次要按钮加 `variant="secondary"` 提升对比。
-- 颜色只用语义 token 类：`text-muted` / `text-danger` / `border-border` / `bg-surface-secondary` / `text-foreground/50` / `bg-accent/10`。**禁硬编码色阶**（`default-200`/`default-600` 这类要换成 `separator`/`muted`），**禁纯黑纯白**（token 在 `src/styles/theme.css` 全用 oklch）。
+- 颜色只用语义 token 类：`text-muted` / `text-danger` / `border-border` / `bg-surface-secondary` / `text-foreground/50` / `bg-accent/10`。**禁硬编码色阶**（`default-200`/`default-600` 这类要换成 `separator`/`muted`），**禁纯黑纯白**。语义 token 定义在 `src/styles/theme.css`。
 - 条件类名用 `cn`（`src/lib/utils.ts`，= `twMerge(clsx(...))`），写法 `cn("基础类", cond && "覆盖类")`。**禁用模板字符串拼 className**。`cn` 用**相对路径** import（`from "../lib/utils"`）——本仓库**没有 `@/` 别名**。
 - 告警/错误/状态块用设计系统组件（`Alert`、`Button`…），**不手搓 `<div className="border-warning/30 bg-warning/10">`**。
 
 ## 错误处理
 
-- 统一走 HeroUI `toast`：`toast.success(t(...))` / `toast.danger(t(...))`（`Toast.Provider` 已全局挂一次）。成功/失败写在 mutation 的 `onSuccess`/`onError`，取消息用 `error instanceof Error ? error.message : String(error)`。
+- 统一走 HeroUI `toast`：`toast.success(t(...))` / `toast.danger(t(...))`（`Toast.Provider` 已全局挂载，勿重复添加）。成功/失败写在 mutation 的 `onSuccess`/`onError`，取消息用 `error instanceof Error ? error.message : String(error)`。
 - 批量操作（部分成功部分失败）：用 `onSettled` 或在 `onError` 分支里先 `invalidateXxxQueries` 再 toast，**不能让抛错跳过 `onSuccess` 把成功结果吞掉并停止刷新列表**。
-- DON'T：`{error && <div>{error.message}</div>}` 内联错误渲染。路由级渲染错误交给 `components/ui/error-boundary.tsx`（已包在每个 Route）。
+- DON'T：`{error && <div>{error.message}</div>}` 内联错误渲染。路由级渲染错误交给 `components/ui/error-boundary.tsx`（已包在每个 Route，勿重复包）。
 
 ## 文件组织、命名、TS
 
@@ -83,17 +83,6 @@ bun run lint          # eslint --fix（@antfu + @eslint-react + better-tailwindc
 
 - 写新功能前先查现有 crate / 前端是否已具备该能力，**优先复用，别在新位置复制一份实现**。
 - DTO/model 只保留有实际消费方的字段，**不为"可能用得上"预留**。
-- 重复逻辑抽 hook（如 `use-multi-select`），重复组件合并（如 `AgentIcons`），大文件按职责拆分，store 模块化。定期用 knip / react-doctor 扫死代码再删。
+- 重复逻辑抽 hook（如 `use-multi-select`），重复组件合并，大文件按职责拆分，store 模块化。定期用 knip / react-doctor 扫死代码再删。
 - 能用平台原生/库标准件就别自造（如用 Tauri 原生窗口而非自绘标题栏）。
 - 小工具优先自实现、不为一个小函数拉 dep（如 semver 比较自己写）；纯数据/纯函数放**无 React import** 的 `lib/*.ts`，与组件渲染分离。
-
-## 反面例（仓库里有也别学）
-
-历史代码或未合并 PR 里能看到这些写法，但不是范式，新代码别照抄：
-
-- 组件内联裸 `useQuery({ queryKey, queryFn })`——一律走 `requests/*.ts` 工厂 + 集中 queryKeys。
-- 自造内存全局单例（`useSyncExternalStore` + 模块级 `let` + listener Set）做跨页状态——状态走 react-query / nuqs / 局部 useState。
-- 自搓 `useDebouncedValue` 内联在业务 hook 里——抽公共 hook。
-- button 套 button、用 `onPointerDown` 顶替可访问按钮——用 HeroUI 组件保证键盘可达。
-- 内联 `<Alert>` 渲染错误而同页已用 toast——统一走 toast。
-- 已废弃别再引入：`fama` 格式化器、`tauri-plugin-decorum` 自绘 titlebar、手写 DTO 类型、为防重渲染手写 memo。
