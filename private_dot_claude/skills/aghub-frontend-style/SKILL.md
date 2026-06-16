@@ -42,12 +42,16 @@ bun run lint          # eslint --fix（@antfu + @eslint-react + better-tailwindc
 
 ## 状态与持久化
 
-- 持久化用 Tauri `@tauri-apps/plugin-store`，**不用 zustand/immer**。`src/lib/store/index.ts` 单例 `Store.load("store.json")`；每个 slice 一个文件导出 async `getXxx/saveXxx`，写完 `await s.save()`。
+- 持久化用 Tauri `@tauri-apps/plugin-store`，**状态不引 zustand**（持久化靠 plugin-store，不是状态库；immer 只在个别组件用 `produce` 做局部不可变更新）。`src/lib/store/index.ts` 单例 `Store.load("store.json")`；每个 slice 一个文件导出 async `getXxx/saveXxx`，写完 `await s.save()`。
 - `src/lib/store.ts` 是 **barrel**，re-export `lib/store/*` 各 slice；消费方统一 `from "../lib/store"` 引多个 `getXxx/saveXxx`，不直接 import 具体 slice 文件。新 slice 记得挂到 barrel。
 - store 结构变更必须加版本迁移：`src/lib/store/migrations/vN-to-vN+1.ts` 一支一文件，`migrations/index.ts` 按 `version <` 串行执行，更新 `store/types.ts` 的 `CURRENT_VERSION`。
 - URL 状态用 nuqs `useQueryState`（选中项、tab 放 query string）。`NuqsAdapter` 已在 `App.tsx` 挂好。
 - 纯局部 UI 状态就地 `useState`，不要为它引全局 store。
 - 表单用 react-hook-form `useForm` + `Controller`，`mode: "onSubmit"` / `reValidateMode: "onChange"`，配 HeroUI `Form validationBehavior="aria"` + `FieldError`，校验消息走 `t(...)`。
+
+## 路由
+
+- 用 **wouter**：`<Router>` 包 `<Switch>` + `<Route path=...>`，页面放 `pages/`、default export、集中在 `App.tsx` 注册。编程式跳转 `const [, setLocation] = useLocation()`；外壳统一 `layouts/main-layout.tsx`。
 
 ## HeroUI v3 与样式
 
