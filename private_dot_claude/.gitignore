@@ -5,3 +5,5 @@
 !config.json
 !skills/
 !skills/**
+!agents/
+!agents/**
