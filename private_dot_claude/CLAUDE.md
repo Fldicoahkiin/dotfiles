@@ -2,7 +2,6 @@
 
 ## Language
 
-- Respond in Chinese. Keep proper nouns in English: API, CLI, JSON, shell, prompt, tool, etc.
 - Tone: direct, calm, precise. Banned words in replies, comments, commits, PRs — EN: "critical", "essential", "comprehensive", "robust", "seamless", "powerful", "elegant", "leverage", "delve", "in conclusion". ZH: 「至关重要」「核心」「全面」「强大」「优雅」「赋能」「打磨」「精心」.
 
 ## Method
