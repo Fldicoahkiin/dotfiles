@@ -1,0 +1,6 @@
+[submodule "skills/demo-video-skill"]
+	path = skills/demo-video-skill
+	url = https://github.com/Fldicoahkiin/demo-video-skill
+[submodule "skills/malicious-skill-sample"]
+	path = skills/malicious-skill-sample
+	url = https://github.com/Fldicoahkiin/malicious-skill-sample
