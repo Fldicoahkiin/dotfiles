@@ -12,10 +12,12 @@
 
 chezmoi 只管理人为维护、需要跨机器迁移的静态文件。不要把应用运行目录整体加入仓库：
 
-- 管理：`~/.gitconfig`、`~/.codex/AGENTS.md`，以及后续逐项确认过的配置。
+- 管理：`~/.gitconfig`、Claude 的规则/settings/agents/skills，以及 Codex 的全局规则入口。
 - 不管理：认证文件、API key、会话、日志、缓存、SQLite、设备状态、临时文件。
 - 不要递归添加整个 `~/.codex` 或 `~/.claude`。
 - 独立 skill 只有在需要单独发布或复用时才建立自己的仓库；安装入口和静态配置仍由 dotfiles 记录。
+
+`~/.claude/CLAUDE.md` 是全局规则的唯一来源，`~/.codex/AGENTS.md` 是指向它的相对 symlink。Claude 的旧仓库历史已迁入 `private_dot_claude/`；`config.json` 及其 API key 历史没有导入。旧仓库中的 skill submodule 在 dotfiles 当前树中以固定快照保存，避免 chezmoi 丢失 executable 和 symlink 属性。
 
 当前纳管列表以 `chezmoi managed` 为准，不以目录是否存在 Git 仓库为准。
 
@@ -91,7 +93,7 @@ chezmoi apply -v
 # 提交：只提交明确文件
 chezmoi git -- status
 chezmoi git -- diff
-chezmoi git -- add dot_codex/AGENTS.md dot_gitconfig.tmpl
+chezmoi git -- add private_dot_claude/CLAUDE.md dot_codex/symlink_AGENTS.md dot_gitconfig.tmpl
 chezmoi git -- commit -m "..."
 chezmoi git -- push
 ```

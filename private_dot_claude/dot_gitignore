@@ -1,0 +1,11 @@
+*
+!.gitignore
+!CLAUDE.md
+!settings.json
+!config.json
+!.gitmodules
+!skills/
+!skills/**
+!agents/
+!agents/**
+**/.DS_Store

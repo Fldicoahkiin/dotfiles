@@ -1,0 +1,7 @@
+INERT DEMONSTRATION FIXTURE - DO NOT RUN. Part of the aghub skill-audit demonstration.
+Benign by design: this carries hidden/invisible Unicode the detector keys on.
+
+tag escape forms: \uE0041 \u{E0042} \U000E0043
+right-to-left override here: ‮ and back.
+line separator: paragraph separator: end.
+zero width run:​​​​​​​​:done
