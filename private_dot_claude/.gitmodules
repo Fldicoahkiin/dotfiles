@@ -4,3 +4,9 @@
 [submodule "skills/malicious-skill-sample"]
 	path = skills/malicious-skill-sample
 	url = https://github.com/Fldicoahkiin/malicious-skill-sample
+[submodule "skills/apple-l10n-zh"]
+	path = skills/apple-l10n-zh
+	url = https://github.com/Fldicoahkiin/apple-l10n-zh
+[submodule "skills/native-feel-cross-platform-desktop"]
+	path = skills/native-feel-cross-platform-desktop
+	url = https://github.com/yetone/native-feel-skill
