@@ -72,5 +72,5 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 ## Git
 
 - Conventional Commits. One commit = one revertible logical change; split mixed concerns (`git add -p`). Breaking: `!` after type.
-- Never add `Co-Authored-By` or any AI attribution. Commit body uses `-` bullets.
-- After changes: `git diff`, then `git add` grouped by logical change, commit directly with a plain multiline message, and push by default. Do not rewrite remote history without explicit approval.
+- Never add `Co-Authored-By` or any AI attribution. Never push unless asked. Commit body uses `-` bullets.
+- After changes: `git diff`, then `git add` grouped by logical change and commit directly with a plain multiline message. Still never push unless asked.
