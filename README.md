@@ -1,17 +1,28 @@
 # dotfiles
 
-用 [chezmoi](https://www.chezmoi.io) 管理本机配置。
+用 [chezmoi](https://www.chezmoi.io) 管理可迁移的本机静态配置。
 
-- **source 仓库**（配置的真相）：`~/.local/share/chezmoi`，也就是这个 git 仓库本体。
+- **source 仓库**（配置的真相）：`~/WorkSpace/Fldicoahkiin_Github/chezmoi`，路径由 `~/.config/chezmoi/chezmoi.toml` 指定。
 - **target**（实际生效）：`$HOME`。
-- **远端**：`github.com/Fldicoahkiin/dotfiles`（public）。
+- **远端**：`github.com/Fldicoahkiin/dotfiles`。
 
-> ⚠️ 本库公开，**绝不明文存密钥**。敏感文件用 `chezmoi add --encrypt` 加密，或在模板里从密码管理器取。
+无论仓库可见性如何，都不明文保存密钥。敏感文件使用 `chezmoi add --encrypt`，或在模板里从密码管理器读取。
+
+## 管理边界
+
+chezmoi 只管理人为维护、需要跨机器迁移的静态文件。不要把应用运行目录整体加入仓库：
+
+- 管理：`~/.gitconfig`、`~/.codex/AGENTS.md`，以及后续逐项确认过的配置。
+- 不管理：认证文件、API key、会话、日志、缓存、SQLite、设备状态、临时文件。
+- 不要递归添加整个 `~/.codex` 或 `~/.claude`。
+- 独立 skill 只有在需要单独发布或复用时才建立自己的仓库；安装入口和静态配置仍由 dotfiles 记录。
+
+当前纳管列表以 `chezmoi managed` 为准，不以目录是否存在 Git 仓库为准。
 
 ## 心智模型
 
 ```
-家目录 $HOME  ──add──▶  source(~/.local/share/chezmoi)  ──push──▶  GitHub
+家目录 $HOME  ──add──▶  source(~/WorkSpace/.../chezmoi)  ──push──▶  GitHub
      ▲                          │
      └────────apply─────────────┘
 ```
@@ -21,17 +32,23 @@
 ## 安装
 
 ```bash
-brew install chezmoi                      # macOS
-sh -c "$(curl -fsLS get.chezmoi.io)"      # 无 brew 时
+brew install chezmoi
 ```
 
-## 新机器一键拉起
+其他平台使用 chezmoi 官方发布的 package，并校验 release checksum；不要直接执行未经检查的远端 shell 脚本。
+
+## 新机器拉起
 
 ```bash
-chezmoi init --apply Fldicoahkiin
-# 等价显式写法：
-chezmoi init --apply https://github.com/Fldicoahkiin/dotfiles.git
+brew install chezmoi
+mkdir -p ~/WorkSpace/Fldicoahkiin_Github
+git clone https://github.com/Fldicoahkiin/dotfiles.git ~/WorkSpace/Fldicoahkiin_Github/chezmoi
+chezmoi -S ~/WorkSpace/Fldicoahkiin_Github/chezmoi init
+chezmoi diff
+chezmoi apply -v
 ```
+
+私有仓库需要先配置 GitHub HTTPS 或 SSH 认证。`init` 会根据仓库中的 `.chezmoi.toml.tmpl` 生成本机配置；机器特有值继续保存在 `~/.config/chezmoi/chezmoi.toml`，不进入 Git。
 
 ## 纳入管理（add）
 
@@ -66,13 +83,20 @@ chezmoi cd                      # 进 source 仓库（exit 退出）
 ## 同步（git）
 
 ```bash
-chezmoi update -v               # = git pull + apply（拉取并应用远端最新，最常用）
+# 拉取：先审查，再应用
+git -C ~/WorkSpace/Fldicoahkiin_Github/chezmoi pull --ff-only
+chezmoi diff
+chezmoi apply -v
+
+# 提交：只提交明确文件
 chezmoi git -- status
-chezmoi git -- add .
+chezmoi git -- diff
+chezmoi git -- add dot_codex/AGENTS.md dot_gitconfig.tmpl
 chezmoi git -- commit -m "..."
 chezmoi git -- push
-# 或：chezmoi cd 进仓库后正常用 git，完了 exit
 ```
+
+`chezmoi update -v` 等于拉取后立即应用，适合已经稳定的配置；需要审查差异时使用上面的分步链路。`chezmoi cd` 可以进入 source 仓库后直接使用 Git。
 
 ## 移除
 

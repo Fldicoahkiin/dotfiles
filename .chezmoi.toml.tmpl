@@ -1,0 +1,12 @@
+# chezmoi 本机配置（每台机器各一份，不进仓库）
+# source 仓库改放到 WorkSpace 下
+sourceDir = "{{ .chezmoi.homeDir }}/WorkSpace/Fldicoahkiin_Github/chezmoi"
+
+# 模板可用的本机变量：模板里用 {{ `{{ .email }}` }} / {{ `{{ .machine }}` }} 引用
+# 内置变量另有 {{ `{{ .chezmoi.hostname }}` }} {{ `{{ .chezmoi.os }}` }} {{ `{{ .chezmoi.arch }}` }}
+[data]
+email = "cfxdwurxla312@hotmail.com"
+name = "Flacier"
+machine = "personal"
+gitEmail = "Flacier@outlook.com"
+safeGitDirectory = "/Volumes/PRTS/theme/CyberGRUB-2077"

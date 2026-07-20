@@ -1,0 +1,26 @@
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+[user]
+	name = {{ .name }}
+	email = {{ .gitEmail }}
+	signingkey = {{ .chezmoi.homeDir }}/.ssh/github_key.pub
+[safe]
+{{- with (index . "safeGitDirectory") }}
+	directory = {{ . }}
+{{- end }}
+[core]
+	autocrlf = input
+	pager = cat
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
+{{- if eq .chezmoi.os "darwin" }}
+[credential]
+	helper = osxkeychain
+{{- end }}
