@@ -102,6 +102,7 @@
     ],
     "defaultMode": "auto"
   },
+  "model": "claude-opus-4-8",
   "hooks": {
     "Notification": [
       {
@@ -219,7 +220,6 @@
       }
     ]
   },
-  "enableWorkflows": false,
   "statusLine": {
     "type": "command",
     "command": "/Users/mac/.vibe-island/bin/vibe-island-statusline"
@@ -278,5 +278,6 @@
   "verbose": true,
   "skipAutoPermissionPrompt": true,
   "pluginConfig": {},
-  "model": "claude-opus-4-8"
+  "agentPushNotifEnabled": true,
+  "inputNeededNotifEnabled": true
 }
