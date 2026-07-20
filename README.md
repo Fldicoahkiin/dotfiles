@@ -17,7 +17,7 @@ chezmoi 只管理人为维护、需要跨机器迁移的静态文件。不要把
 - 不要递归添加整个 `~/.codex` 或 `~/.claude`。
 - 独立 skill 只有在需要单独发布或复用时才建立自己的仓库；安装入口和静态配置仍由 dotfiles 记录。
 
-`~/.claude/CLAUDE.md` 是全局规则的唯一来源，`~/.codex/AGENTS.md` 是指向它的相对 symlink。Claude 的旧仓库历史已迁入 `private_dot_claude/`；`config.json` 及其 API key 历史没有导入。旧仓库中的 skill submodule 在 dotfiles 当前树中以固定快照保存，避免 chezmoi 丢失 executable 和 symlink 属性。
+`~/.claude/CLAUDE.md` 和 `~/.codex/AGENTS.md` 是两份独立的普通文件。两者共享通用工程规则，但允许保留各自产品的指令层级和配置约定；内容不同是预期状态，不使用 symlink 强制一致。Claude 的旧仓库历史已迁入 `private_dot_claude/`；`config.json` 及其 API key 历史没有导入。旧仓库中的 skill submodule 在 dotfiles 当前树中以固定快照保存，避免 chezmoi 丢失 executable 和 symlink 属性。
 
 当前纳管列表以 `chezmoi managed` 为准，不以目录是否存在 Git 仓库为准。
 
@@ -30,6 +30,15 @@ chezmoi 只管理人为维护、需要跨机器迁移的静态文件。不要把
 ```
 
 文件名编码（source 里这样存，apply 后还原）：`dot_zshrc` → `~/.zshrc`；`*.tmpl` → 模板；`private_*` → 权限 0600；`encrypted_*` → 加密。
+
+chezmoi 不会把 target 的手动改动自动写回 source 仓库：
+
+- `git status` 只检查 source 仓库，不能直接看到 `$HOME` 中的改动。
+- `chezmoi diff` / `chezmoi status` 检查每个 target 与其 source 是否一致，不会比较 `CLAUDE.md` 和 `AGENTS.md` 两份独立文件。
+- 直接修改 `$HOME` 后，用 `chezmoi re-add <明确路径>` 将改动吸回 source，再由 Git 提交。
+- 直接修改 source 后，用 `chezmoi apply <明确路径>` 部署到 `$HOME`。
+
+不使用 Git hook 或后台脚本自动执行 `re-add`。自动写回会在提交前悄悄吸收应用生成内容或敏感字段；保持显式 `re-add` 更容易审查。日常优先使用 `chezmoi edit --apply` 从 source 修改，只有应用直接改写 target 时才执行指定路径的 `re-add`。
 
 ## 安装
 
@@ -78,7 +87,8 @@ chezmoi unmanaged        # 列出 $HOME 里还没纳管的文件
 ```bash
 chezmoi edit ~/.zshrc           # 改 source（不要直接改家目录里的）
 chezmoi edit --apply ~/.zshrc   # 改完立即 apply
-chezmoi re-add                  # 手改过家目录后，把改动吸回 source
+chezmoi re-add ~/.zshrc         # 手改过家目录后，把指定改动吸回 source
+chezmoi re-add ~/.claude/CLAUDE.md ~/.codex/AGENTS.md
 chezmoi cd                      # 进 source 仓库（exit 退出）
 ```
 
@@ -93,7 +103,7 @@ chezmoi apply -v
 # 提交：只提交明确文件
 chezmoi git -- status
 chezmoi git -- diff
-chezmoi git -- add private_dot_claude/CLAUDE.md dot_codex/symlink_AGENTS.md dot_gitconfig.tmpl
+chezmoi git -- add private_dot_claude/CLAUDE.md dot_codex/AGENTS.md dot_gitconfig.tmpl
 chezmoi git -- commit -m "..."
 chezmoi git -- push
 ```
