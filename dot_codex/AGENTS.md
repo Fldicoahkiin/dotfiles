@@ -1,76 +1,52 @@
-# Global Rules
+# Global defaults
 
-## Codex Instruction Scope
+Repository and subdirectory AGENTS.md files override conflicting defaults here. Follow executable project configuration when prose is stale, and note the mismatch. Keep model, reasoning, sandbox, approval, MCP, and feature settings in ~/.codex/config.toml.
 
-- Treat this file as global defaults. A repository or subdirectory `AGENTS.md` closer to the working directory overrides conflicting guidance.
-- When prose documentation conflicts with executable project configuration or build scripts, follow the executable source and briefly note the mismatch.
-- Keep model, reasoning, sandbox, approval, MCP, and feature settings in `~/.codex/config.toml`; keep project commands and conventions in repository-level `AGENTS.md` files.
+## Working style
 
-## Language
+- Be direct, calm, and precise. Avoid promotional language. Banned words: "critical", "essential", "comprehensive", "robust", "seamless", "powerful", "elegant", "leverage", "delve", "in conclusion"; 「至关重要」「核心」「全面」「强大」「优雅」「赋能」「打磨」「精心」.
+- Make the smallest change that completes the request. Preserve existing conventions, user edits, features, and data contracts. Avoid speculative features and abstractions.
+- Resolve ordinary implementation choices yourself. Ask when missing information changes scope, authorization, or the intended outcome; continue independent work meanwhile.
+- Complete implementation, relevant verification, and fixes within the authorized scope. Report what was actually tested and what remains unverified.
 
-- Tone: direct, calm, precise. Banned words in replies, comments, commits, PRs — EN: "critical", "essential", "comprehensive", "robust", "seamless", "powerful", "elegant", "leverage", "delve", "in conclusion". ZH: 「至关重要」「核心」「全面」「强大」「优雅」「赋能」「打磨」「精心」.
+## Files and code
 
-## Method
+- Never use `rm`; use `trash` for deletion. Never read credential directories such as ~/.ssh, ~/.aws, or ~/.gnupg.
+- Preserve unknown fields, ordering, and comments in user-owned configuration. Do not overwrite unrelated changes.
+- Modify existing code in place. Use domain-specific names; follow framework naming where required. Avoid renamed copies with suffixes such as `_enhanced`, `_improved`, `_v2`, `_fixed`, `_new`, `_better`, `_optimized`, or `_refactored`.
+- Extend existing registries and capability tables. Do not add public APIs without an actual caller, except when the library API itself is the deliverable.
+- Fix causes instead of suppressing diagnostics. Explain unavoidable FFI exceptions. Do not silently swallow errors or switch providers; report failures at the appropriate boundary. Give network and process calls timeouts.
+- Comments explain non-obvious constraints or behavior; omit narration and comments on untouched code.
 
-- Think first: state assumptions; surface competing interpretations instead of silently picking one; push back when a simpler way exists; unclear → stop, name what's confusing, ask. Trivial tasks: skip the ceremony.
-- Surgical: every changed line traces to the request. Don't touch adjacent code or formatting; match existing style even if you'd do it differently. Unrelated dead code → mention, don't delete. Remove only orphans your own change created.
-- Goal-driven: turn vague tasks into verifiable criteria; every bug fix starts with a failing repro test, then made to pass; loop until they hold. Multi-step tasks: state a brief plan, each step paired with its verify check (`step → verify`).
+## Verification
 
-## Simplicity First
+- Use repository-defined checks. If a justfile defines fmt/lint recipes, use them. Otherwise use the project's language and package scripts; keep project-specific commands in its AGENTS.md.
+- For a bug, establish a failing reproduction and verify the fix. Automate the regression when it protects meaningful behavior; a visual or environment issue may need a browser reproduction.
+- Verify changed UI behavior in the browser. Use relevant lint/typecheck/build checks for code changes. Do not repeat successful checks unless another change, failure, or unresolved concern warrants it.
+- Prefer deterministic tests for known behavior. Use `jev-browser` for bounded DOM-based browser exploration and E2E execution; retain a reasoning model for planning, code changes, failure diagnosis, and unsupported native or visual interactions. Report a Jev blocker before switching execution methods.
 
-**Minimum code that solves the problem. Nothing speculative.**
+## Frontend defaults
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+- Follow packageManager, lockfiles, and repository configuration; otherwise prefer bun, then pnpm.
+- Use the project's icon library instead of emoji icons; prefer lucide-react in a compatible new React project. Avoid `any` or `as any` without a concrete reason.
+- Keep state at its smallest scope; compute derived values during render. Use stable semantic list keys. Split components by responsibility when their size or state makes them hard to follow.
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+## Skill dependencies
 
-## Safety
+- Keep one installed copy of each upstream skill. Reference its name and GitHub source; load only the parts needed for the current task.
+- A link does not install a dependency. When a required skill is missing, retrieve its entrypoint and necessary references or scripts outside auto-discovered skill directories. Use pinned refs when reproducibility matters, and report unavailable dependencies.
 
-- Never use `rm` in any form. For deletion use `trash`, or confirm before any destructive action.
-- Never read credential dirs: `~/.ssh/`, `~/.aws/`, `~/.gnupg/`, etc.
+## TypeSafe credentials
 
-## Robustness
+- For authorized Jev/TypeSafe work, use an existing `TYPESAFE_API_KEY` first. Otherwise, on macOS read only the Keychain item with service `typesafe.ai` and account `TYPESAFE_API_KEY`. If that item does not exist, or on other platforms, load `~/.config/typesafe/.env` (the user's home directory on every platform). This is a scoped exception to the credential-directory restriction above.
+- Capture credentials directly into the execution process; never print them, open the .env in a preview, or copy them into a repository. A locked/denied Keychain read is a blocker, not permission to bypass it. The .env is plaintext, owner-only on macOS/Linux; when rotating the key, update both stores explicitly.
 
-- `#[allow]` / `eslint-disable` / `noqa` / `type: ignore` / `@ts-ignore` are anaesthetic, not fixes. Resolve the root cause. Exception: FFI with an explanation comment.
-- Errors propagate to a boundary (main / handler / CLI / tool entry) via `?`, handled once. No mid-pipeline `match err => default` swallowing.
-- No over-defensive code. Validate untrusted input once at the boundary, then trust it inward — don't re-check what the type system or an upstream guard already guarantees.
+## Cloudflare
 
-## Code Consistency
-
-- Modify in-place. Never create renamed "new version" files or symbols. Banned suffixes: `_enhanced`, `_improved`, `_v2`, `_fixed`, `_new`, `_better`, `_optimized`, `_refactored` (and ZH equivalents).
-- Banned generic names: `Manager`, `Handler`, `Helper`, `Util`, `Service`, `Processor`, `Engine`, `Wrapper`, `Base*`, `Abstract*`. Name things in domain terms.
-- Rule of Three: tolerate duplication at 2 occurrences, consider extraction at 3+. Default to inline when unsure.
-- No speculative `pub`/`export` — a new public item needs a real caller in the same commit. Exception: a library's public API is the deliverable.
-- Don't drop features, data shape, or architecture intent without explicit approval.
-
-## Comments
-
-- Say what the code does; explain *why* only for non-obvious logic or domain constraints. No refactor narration. Don't comment untouched code.
-
-## Architecture
-
-- Registry-/descriptor-/capability-driven codebases: extend existing tables and wiring points, don't scatter special cases.
-- User-owned config (JSON/TOML/YAML): minimal, non-destructive edits. Preserve unknown fields, ordering, comments.
-- No silent fallbacks across tool/provider boundaries — explicit errors or logs.
-- Network and process calls need timeouts.
-
-## Validation
-
-- After changes: if a `justfile` exists, use `just fmt` / `just lint`. Else — Rust: `cargo fmt` + `cargo clippy --workspace --all-targets --all-features -- -D warnings`; Frontend: the repo's lint/typecheck/build scripts.
-- Verify frontend changes in the browser — build passing is not enough. Fix warnings at the root.
-
-## Frontend
-
-- Package manager: `bun`, fallback `pnpm` — unless repo config (`packageManager` field, lockfile, `.npmrc`) says otherwise.
-- No emoji as icons (use lucide-react). No `any`/`as any` without a concrete reason.
-- Split a component at >300 lines or >5 `useState`. State at smallest scope. List keys: semantic ids, never array index. Derived values computed at render, not mirrored into state.
+- Production Workers must connect to their GitHub repository and deploy automatically from the production branch. Direct deployment is for initial verification or incident response; establish the Git connection before handoff. Align the name in wrangler.jsonc with the connected Cloudflare project.
 
 ## Git
 
-- Conventional Commits. One commit = one revertible logical change; split mixed concerns (`git add -p`). Breaking: `!` after type.
-- Never add `Co-Authored-By` or any AI attribution. Never push unless asked. Commit body uses `-` bullets.
-- After changes: `git diff`, then `git add` grouped by logical change and commit directly with a plain multiline message. Still never push unless asked.
+- Use Conventional Commits; one commit per revertible logical change. Mark breaking changes with `!`. Commit bodies use `-` bullets; add no Co-Authored-By trailer or AI attribution.
+- After repository changes, inspect the diff, stage only the intended changes, and commit. Never push unless asked.
+- Use `Flacier <Flacier@outlook.com>` as the author. Before any GitHub write, verify `gh api user --jq .login` returns `Fldicoahkiin`; do not write using another account.
