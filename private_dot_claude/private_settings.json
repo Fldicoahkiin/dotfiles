@@ -9,7 +9,6 @@
       "Bash(cat:*)",
       "Bash(head:*)",
       "Bash(tail:*)",
-      "Bash(find:*)",
       "Bash(which:*)",
       "Bash(echo:*)",
       "Bash(pwd:*)",
@@ -19,17 +18,14 @@
       "Bash(git show:*)",
       "Bash(git branch:*)",
       "Bash(git remote:*)",
-      "Bash(git stash:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git checkout:*)",
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git rebase:*)",
       "Bash(git merge:*)",
       "Bash(git tag:*)",
       "Bash(git rev-parse:*)",
-      "Bash(git config:*)",
       "Bash(git blame:*)",
       "Bash(git worktree:*)",
       "Bash(gh pr view:*)",
@@ -40,15 +36,12 @@
       "Bash(gh repo view:*)",
       "Bash(gh repo list:*)",
       "Bash(gh repo clone:*)",
-      "Bash(gh repo fork:*)",
       "Bash(gh issue view:*)",
       "Bash(gh issue list:*)",
       "Bash(gh search:*)",
-      "Bash(gh api:*)",
+      "Bash(gh api user --jq .login)",
       "Bash(gh run view:*)",
       "Bash(gh run list:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
       "Bash(wc:*)",
       "Bash(sort:*)",
       "Bash(uniq:*)",
@@ -56,13 +49,9 @@
       "Bash(file:*)",
       "Bash(stat:*)",
       "Bash(du:*)",
-      "Bash(env:*)",
-      "Bash(printenv:*)",
       "Bash(uname:*)",
       "Bash(whoami:*)",
       "Bash(date:*)",
-      "Bash(python3 -c:*)",
-      "Bash(node -e:*)",
       "Bash(jq:*)",
       "Bash(npm view:*)",
       "Bash(npm list:*)",
@@ -71,8 +60,6 @@
       "Bash(npx eslint:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
-      "Bash(sed:*)",
-      "Bash(awk:*)",
       "Bash(tr:*)",
       "Bash(cut:*)",
       "Bash(column:*)",
@@ -81,7 +68,6 @@
       "Bash(realpath:*)",
       "Bash(readlink:*)",
       "Bash(tree:*)",
-      "Bash(git -C:*)",
       "Bash(cargo check:*)",
       "Bash(cargo clippy:*)",
       "Bash(cargo fmt:*)",
@@ -100,9 +86,14 @@
       "Bash(bun pm:*)",
       "mcp__pencil"
     ],
+    "deny": [
+      "Bash(rm:*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)"
+    ],
     "defaultMode": "auto"
   },
-  "model": "claude-opus-4-8",
   "hooks": {
     "Notification": [
       {
@@ -235,7 +226,7 @@
     "explanatory-output-style@claude-plugins-official": false,
     "stripe@claude-plugins-official": false,
     "mcp-server-dev@claude-plugins-official": true,
-    "learning-output-style@claude-plugins-official": true,
+    "learning-output-style@claude-plugins-official": false,
     "playground@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "kotlin-lsp@claude-plugins-official": false,
@@ -279,5 +270,15 @@
   "skipAutoPermissionPrompt": true,
   "pluginConfig": {},
   "agentPushNotifEnabled": true,
-  "inputNeededNotifEnabled": true
+  "inputNeededNotifEnabled": true,
+  "advisorModel": "fable",
+  "enableWorkflows": true,
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "223.112.233.194",
+        "conf.bocloud.com.cn"
+      ]
+    }
+  }
 }
