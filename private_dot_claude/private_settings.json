@@ -211,6 +211,7 @@
       }
     ]
   },
+  "enableWorkflows": true,
   "statusLine": {
     "type": "command",
     "command": "/Users/mac/.vibe-island/bin/vibe-island-statusline"
@@ -259,20 +260,37 @@
     "cloudflare@claude-plugins-official": true,
     "netlify-skills@claude-plugins-official": true,
     "desktop-commander@claude-plugins-official": true,
-    "coderabbit@claude-plugins-official": true
+    "coderabbit@claude-plugins-official": true,
+    "global@eric-way": true,
+    "project@eric-way": true,
+    "js@eric-way": true,
+    "rust@eric-way": true,
+    "python@eric-way": true,
+    "frontend@eric-way": true,
+    "backend@eric-way": true,
+    "desktop@eric-way": true,
+    "tauri@eric-way": true,
+    "electron@eric-way": true,
+    "review@eric-way": true,
+    "eric-design@eric-design-skill": true
   },
-  "extraKnownMarketplaces": {},
+  "extraKnownMarketplaces": {
+    "eric-way": {
+      "source": {
+        "source": "github",
+        "repo": "AkaraChen/eric-way"
+      },
+      "autoUpdate": true
+    },
+    "eric-design-skill": {
+      "source": {
+        "source": "github",
+        "repo": "AkaraChen/eric-design-skill"
+      },
+      "autoUpdate": true
+    }
+  },
   "language": "中文",
-  "autoUpdatesChannel": "stable",
-  "theme": "dark",
-  "editorMode": "vim",
-  "verbose": true,
-  "skipAutoPermissionPrompt": true,
-  "pluginConfig": {},
-  "agentPushNotifEnabled": true,
-  "inputNeededNotifEnabled": true,
-  "advisorModel": "fable",
-  "enableWorkflows": true,
   "sandbox": {
     "network": {
       "allowedDomains": [
@@ -280,5 +298,14 @@
         "conf.bocloud.com.cn"
       ]
     }
-  }
+  },
+  "advisorModel": "fable",
+  "autoUpdatesChannel": "stable",
+  "theme": "dark",
+  "editorMode": "vim",
+  "verbose": true,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true,
+  "pluginConfig": {}
 }
