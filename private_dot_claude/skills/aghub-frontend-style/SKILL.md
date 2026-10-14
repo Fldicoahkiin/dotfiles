@@ -1,92 +1,355 @@
 ---
 name: aghub-frontend-style
-description: aghub 桌面前端（crates/desktop）编码规约——React 19 + HeroUI v3 + Tailwind v4 + Tauri v2 的本仓库实际风格。写或改 crates/desktop/src 下任何 .tsx/.ts，做 UI/组件/数据请求/状态/i18n/路由时加载。
+description: Repository-specific frontend rules for the aghub Tauri desktop app in crates/desktop. Use when creating, changing, debugging, or reviewing React/TypeScript UI, HeroUI components, Tailwind styles, interaction behavior, motion, queries, local state, routing, forms, accessibility, or i18n under crates/desktop/src.
 ---
 
-# aghub 前端编码规约
+# aghub Desktop Frontend
 
-适用于 `crates/desktop/src/`。栈：React 19 + TypeScript 6 + HeroUI v3 + Tailwind CSS v4 + Tauri v2，包管理 **bun**（禁 npm/yarn/pnpm）。
+Apply these rules to `crates/desktop/src/`. The stack is React 19, strict
+TypeScript, HeroUI v3, Tailwind CSS v4, Tauri v2, TanStack Query, and `bun`.
 
-## 改完必须验证
+## HeroUI source of truth
+
+- Read `crates/desktop/package.json` and the lockfile before choosing component
+  anatomy. The current repository baseline is HeroUI 3.2.2 and React Aria
+  Components 1.19.0.
+- Match the official HeroUI documentation and release notes to the installed
+  version, then inspect the installed JavaScript, declarations, and CSS when
+  rendered semantics or default spacing remain ambiguous.
+- Treat `.heroui-docs/react/` as an optional local cache. If it is absent or
+  stale, use the official online documentation and report the mismatch. Do not
+  rely on remembered beta APIs or installation examples.
+
+## Resolve the local context first
+
+1. Read the nearest `AGENTS.md`, `.impeccable.md`, executable config, and the
+   sibling components at the same DOM level.
+2. Treat executable config and installed package source as the final word when
+   prose is stale. Report the mismatch.
+3. Fetch the matching HeroUI v3 docs with the local `heroui-react` skill before
+   writing or changing a HeroUI component. Confirm ambiguous behavior against
+   the installed package rather than remembered v2 or earlier v3 anatomy.
+4. Inspect the rendered accessibility tree and computed styles. Passing
+   TypeScript is not visual or interaction verification.
+
+The product is a dense desktop tool for developers managing agent
+configuration. Keep it precise, calm, compact, and transparent about state.
+Use structure, alignment, typography, and hairlines before decoration. Follow
+the neutral palette and existing accent tokens in `src/styles/theme.css`;
+avoid warm coziness, marketing layouts, ornamental copy, and Apple-like
+softness. `.impeccable.md` and the current theme disagree about the accent hue,
+so do not encode a hue in new rules until the configuration is reconciled.
+
+## Work in a fail-first loop
+
+For every UI bug or interaction regression:
+
+1. Reproduce it in the real page and compare a correct sibling at the same
+   hierarchy.
+2. Add a focused failing test before the implementation change.
+3. Scan the affected page for visual slop, classify hits by intent, and report
+   the confirmed issues before editing.
+4. Make the smallest change that fixes the ownership or component mistake.
+5. Verify behavior, keyboard access, reduced motion, light/dark appearance,
+   and the actual desktop viewport.
+
+Prefer role/name assertions. Use computed-style assertions for hover and
+background regressions. Guard compound controls against nested interaction
+with assertions such as `[role="button"] button` having count zero.
+
+## Surface ownership and page layout
+
+- Let `MainLayout` own the app canvas. It uses a secondary Surface.
+- Use the established page shell: `h-full overflow-y-auto`, then a centered
+  width-constrained content container with `p-4 sm:p-6` when the page is a
+  document-like overview. Match the nearest sibling's `max-w-*`; do not widen
+  a single tab or route without a content reason.
+- Treat `Tabs.Panel` as the content shell. Compare every sibling panel before
+  styling one. When Appearance uses one default Card inside its panel, give a
+  settings-heavy sibling one default Surface or Card at the same level; do not
+  leave one panel on the secondary canvas while another has an entity surface.
+- Use `Surface` for a section-level background/context. Use `Card` for a
+  bounded object or independently actionable entity. A layout wrapper is not
+  automatically a Card.
+- Use Surface variants by layer: `transparent` inherits the parent canvas,
+  `default` owns the primary entity layer, `secondary` separates a subordinate
+  region, and `tertiary` is reserved for another real nested level.
+- Keep one visible surface per region. Inside it, group related settings with
+  spacing and `divide-*` or `border-*` hairlines. Keep a nested surface only
+  for a genuinely separate object such as a preview, embed, or drag replica.
+- Put form controls inside a default Surface on HeroUI's `secondary` field
+  variant. This includes `Input`, `Select`, `TextField`, and `NumberField`.
+- Use `min-w-0` on shrinking flex/grid children and `shrink-0` only on controls
+  that must retain their hit target. Use `Tabs.ListContainer` for overflow;
+  it already supplies scroll affordances.
+- Space by relationship. Keep labels close to their descriptions and use a
+  larger step between settings groups. Do not use one gap token everywhere.
+- Preserve primary labels at compact desktop widths. Reduce the responsive
+  grid column count or wrap secondary metadata before truncating the label;
+  verify the narrowest supported desktop viewport without horizontal overflow.
+
+## Interaction ownership
+
+- Give each target one primary action. If a row navigates, its chevron alone
+  expands. If a drag region moves an item, visibility/delete actions are
+  sibling buttons outside that drag region.
+- Put page-wide or panel-wide actions at that owning level. Do not place a
+  global reset beside update/install actions in the first subsection merely
+  because it appears first.
+- Do not nest interactive semantics. Never place a `button`, link, or another
+  `[role="button"]` inside an interactive parent. Stopping propagation does not
+  repair invalid semantics.
+- Prefer HeroUI controls over hand-built equivalents. Use `Toolbar` for a real
+  action group and `isAttached` when the group needs one surface. Use
+  `ButtonGroup` only when actions form one control; keep independent actions as
+  separate Buttons.
+- Use the compound Tooltip anatomy: `Tooltip`, `Tooltip.Trigger`, and
+  `Tooltip.Content`, with `Tooltip.Arrow` only when it improves targeting. In
+  HeroUI 3.2.2, the default Trigger renders a `div role="button"`; wrapping an
+  interactive Button creates nested semantics and two focus targets. For an
+  interactive trigger, use the Trigger's polymorphic `render` prop to render
+  the one actual control while forwarding its props and ref, or omit the
+  Tooltip. Assert that the result has one focus target and no nested button.
+- Use `onPress` for HeroUI actions. Use native `onClick` only on intentional
+  native elements that cannot be expressed by the library without losing
+  semantics.
+- Give icon-only actions localized `aria-label` text and a Tooltip when the
+  icon is not self-explanatory. Keep the visible icon from Heroicons or an
+  existing project icon source; do not use emoji.
+- Use Tauri's OS-owned file and folder pickers, native system capability
+  prompts, and native alerts for simple OS-owned confirmations. Use HeroUI for
+  product operations that need application-managed pending, error, recovery,
+  or partial-success states.
+- Use the platform's primary modifier for shortcuts (`Meta` on macOS,
+  `Control` elsewhere) and the existing platform helpers for displayed labels
+  or OS-specific behavior.
+- Keep `data-tauri-drag-region` free of interactive descendants. Window
+  controls and other actions must remain outside the draggable hit area.
+
+## Hover, focus, disabled state, and motion
+
+- Add hover only to enabled interactive affordances. Non-interactive rows and
+  disabled controls must not react to pointer hover.
+- Do not add `cursor-pointer` to ordinary desktop rows or Buttons. Use grab and
+  grabbing cursors only on the region that actually drags.
+- Express row hover with a small semantic surface/color change. Do not fade the
+  row, scale it, lift it, glow it, or use `transition-all`.
+- Transition only the property that changes, normally color, opacity, transform,
+  or `grid-template-rows`, using the project duration/easing variables.
+- Preserve focus-visible feedback and keyboard behavior. Do not remove a focus
+  ring unless an equal or clearer project-token replacement exists.
+- Prefer HeroUI's own enter/exit and pending behavior. Do not add a second FLIP,
+  spring, or route fade on top of library motion.
+- Animate physical drag/reorder movement when it helps track the object. Keep
+  click actions immediate. Rotate only the pending refresh icon through the
+  Button `isPending` render state.
+- A full fixed-slot layout uses insertion semantics: insert at the hovered
+  position, shift following fields, and move only the final overflow field to
+  the hidden drawer. Project the result before release; do not ambiguously
+  replace the hovered field. Test a right-column target, full capacity, cancel,
+  release, and the keyboard path.
+- Keep pointer edge auto-scroll available whenever a compatible target can lie
+  outside the actual scrollport, including wide but short desktop windows. Do
+  not enable or disable it from a responsive breakpoint alone. When a
+  side-by-side canvas would otherwise scroll too eagerly, narrow the threshold
+  to the scrollport edge and verify both a normal desktop viewport and a wide,
+  short viewport. Configure keyboard-sensor scrolling separately; use
+  `scrollBehavior: "auto"` for immediate desktop movement and test offscreen
+  target reachability. Give every droppable slot a stable identity and
+  geometry. Resolve pointer targets from current slot rectangles and keyboard
+  targets from directional compatible slots. The live projection, accessible
+  announcement, and committed drop must agree. Prefer the live layout
+  projection over a post-drop ghost animation; never leave two drag overlays
+  visible between consecutive moves.
+- Honor `prefers-reduced-motion`. No bounce, hover growth, decorative pulse, or
+  full-page transition.
+
+## HeroUI v3 rules
+
+- Use compound anatomy from the fetched docs. Tabs use
+  `Tabs.ListContainer`, `Tabs.List`, `Tabs.Tab`, an optional `Tabs.Separator`,
+  `Tabs.Indicator`, and sibling `Tabs.Panel` elements. `Tabs.ListContainer`
+  owns overflow chevrons and fades in HeroUI 3.2.2; do not add a parallel
+  manual scrolling implementation.
+- Compose selection controls explicitly. In HeroUI 3.2.2, Switch, Checkbox,
+  and Radio use their documented `*.Content` parts alongside their controls
+  and indicators. Do not translate a v2 flat-prop example into this codebase.
+- Use `ToggleButtonGroup selectionMode="single"` with controlled
+  `selectedKeys` for mutually exclusive visual choices such as choosing one
+  version to retain. Use `ToggleButton` children with stable IDs; do not
+  recreate single-selection keyboard and pressed semantics with plain Buttons.
+- Use `Typography`, not the removed `Text` component name.
+- Choose variants by context, not by blanket rule. Default Surface/Card creates
+  the entity layer; secondary form variants reduce field elevation inside it;
+  ghost Buttons are for low-emphasis actions; attached Toolbar owns its own
+  group surface.
+- For `NumberField`, default to the horizontal anatomy: DecrementButton,
+  Input, then IncrementButton in one Group. The documented chevron example is
+  an allowed vertical step-button layout when the surrounding control geometry
+  calls for it. Use Intl `formatOptions` for units and percentages, align the
+  Group with nearby 36px fields, and test usable hit targets, keyboard
+  stepping, and narrow-width layout for either form.
+- Use `ListBox.Section` for semantic groups and `ListBox.Item` for items. The
+  installed theme and computed styles own row padding and gaps; do not copy
+  spacing from a virtualizer example or add invisible wrapper indentation.
+- Use semantic token classes such as `text-muted`, `text-danger`,
+  `border-border`, `bg-surface`, `bg-surface-secondary`, and `bg-accent/10`.
+  Do not hard-code framework color scales, pure black/white, gradients, tinted
+  icon tiles, or one-hue status boxes.
+- Pair foreground tokens with their actual surface. `text-accent-foreground` is
+  for a solid accent fill; use `text-accent` or the soft-accent foreground on a
+  translucent accent tint, and verify the computed contrast in light and dark
+  themes.
+- Use `cn` from `src/lib/utils.ts` for conditional classes. Import it with a
+  relative path; this repository has no `@/` alias. Do not build class strings
+  with template interpolation.
+- Use the design-system Alert, Toast, Button, Surface, and other primitives
+  instead of recreating their state visuals with generic divs.
+- Mount one `Toast.Provider` at the application root. Report ordinary results
+  through `toast`, and use `toast.promise` for an operation whose pending,
+  success, and failure states share one lifecycle. A persistent pending toast
+  may use `timeout: 0`; dismiss or replace it when the operation settles.
+
+## React and state
+
+- Fetch server state with TanStack Query, not `useEffect`.
+- Derive state during render. Use `useMemo` for meaningful derivation or stable
+  identity, not as a routine performance wrapper; React Compiler handles normal
+  memoization.
+- Reserve `useEffect` for external synchronization such as Tauri startup,
+  window/media listeners, deep links, or third-party controllers. Return
+  cleanup when the external system supports it.
+- Keep local interaction state at the smallest owner. Use `useReducer` for one
+  state machine rather than several coupled booleans. Use discriminated unions
+  for polymorphic steps and pure builders for sequences.
+- Keep one semantic owner for each setting. Other pages consume or link to that
+  setting; they do not mirror another management UI.
+- Treat persisted-setting hydration as an explicit state. Do not issue queries,
+  enable controls, or persist defaults before the stored value has loaded.
+  When a feature is disabled, gate both new queries and rendering of cached
+  TanStack Query data.
+- Reset child state with lazy initialization plus a semantic `key` when a full
+  remount is the intended behavior. Do not synchronize derived child state with
+  an effect.
+- Use React 19 context syntax: `use(Context)` and `<Context value={...}>`.
+  Separate context declarations from provider implementations as established in
+  `contexts/` and `providers/`.
+
+## Data access and persistence
+
+For HTTP server state, keep the repository's three layers:
+
+1. `src/lib/api.ts`: resource-grouped `ky` methods, error body promotion, and
+   explicit timeouts for slow calls.
+2. `src/requests/<resource>.ts`: named `queryOptions`/`mutationOptions`
+   factories and centralized invalidation helpers.
+3. `src/requests/keys.ts`: hierarchical query-key factories ending in
+   `as const`.
+
+Consume them as `useApi()` plus a named options factory. Use generated DTOs as
+type-only imports and keep their snake_case fields. Never hand-edit
+`src/generated/dto`; when Rust DTOs change, run `bun run generate:dto` and
+commit the generated diff. Do not invent parallel request types.
+
+Tauri/plugin diagnostics are local process state, not HTTP API methods. Keep a
+one-off local query at the process boundary when it is truly local; extract a
+named hook or options factory when reused. Never hide tool/provider failure
+behind a silent fallback.
+
+Persist user settings with `@tauri-apps/plugin-store`. Re-export store slices
+through `src/lib/store.ts`, save after writes, and add a sequential versioned
+migration whenever the stored shape changes. Use `nuqs` for URL-owned tab and
+selection state. Do not add another global state library for local UI state.
+
+## Errors, forms, routing, and i18n
+
+- Report mutation results through the root `Toast.Provider` with HeroUI's
+  `toast` methods. For a batch of independent operations, preserve successful
+  items and run their invalidation even when another item fails.
+- If one confirmation presents writes to multiple owners as an atomic
+  operation, snapshot the prior state and compensate already-successful writes
+  when a later write fails. Await the write and any compensation under one
+  pending state. Block duplicate submits and dismissal while pending, close
+  only after every write succeeds, and keep the dialog open with the failure
+  reported otherwise. Preserve Escape dismissal while idle and disable
+  keyboard dismissal only for the pending interval.
+- Let the route error boundary handle render failures. Keep validation errors
+  next to fields with HeroUI `FieldError`.
+- Use react-hook-form plus `Controller` for non-trivial forms, HeroUI `Form`
+  with `validationBehavior="aria"`, submit-time validation, and change-time
+  revalidation after failure.
+- Use wouter and register route pages in `App.tsx`. Use `nuqs` for query-string
+  state and `useLocation` for navigation.
+- Route every user-visible string, Toast, validation message, Tooltip, and
+  `aria-label` through i18next. Add camelCase keys to `en.ts`, `zh-Hans.ts`, and
+  `zh-Hant.ts` together.
+
+## Files and TypeScript
+
+- Use kebab-case filenames. Use default exports for route pages and named
+  function exports for reusable components and hooks.
+- Keep props interfaces beside the component and private unless another module
+  has a real caller. Use domain names; avoid generic Manager, Handler, Helper,
+  Service, Processor, or Wrapper names.
+- Name internal event functions `handleXxx` and callback props `onXxx`. Comment
+  current behavior; explain why only for a non-obvious platform or domain
+  constraint. Do not narrate a refactor.
+- Split a component when it exceeds 300 lines or owns more than five
+  `useState` calls. Extract repeated derivation into a domain hook only when it
+  has real shared callers. Do not create an abstraction for a single use.
+- Use strict types, `import type`, semantic list keys, and `unknown` plus
+  narrowing. Do not use `any`, `as any`, `@ts-ignore`, or index keys.
+- Import Tauri plugins statically. Use `invoke<T>` for native commands and
+  `ky`/TanStack Query for HTTP business calls.
+
+## Repository exemplars
+
+Use these `main` files as intent references, then check their current rendered
+behavior and current HeroUI docs:
+
+- `components/resource-group-section.tsx` (AkaraChen): separate navigation,
+  expansion, selection, drag, and keyboard ownership.
+- `e2e/list-interactions.spec.ts` (AkaraChen): lock interaction intent with
+  role-based behavior tests.
+- `components/resource-page-toolbar.tsx` and `components/app-sidebar.tsx`
+  (danielchim): compact desktop alignment, shrinking content, fixed controls,
+  and structural separators.
+- `pages/home.tsx` and `components/agent-overview-card.tsx` (danielchim,
+  refined by AkaraChen): width-constrained page rhythm, derived summaries,
+  quiet loading states, and content-driven card height.
+
+Do not copy an exemplar mechanically. Older call sites can retain outdated
+Tooltip anatomy or nested interactive markup. Preserve the design intent while
+letting live docs, semantics, and tests decide the implementation.
+
+## Verify before handoff
+
+Run checks proportional to the change:
 
 ```bash
 cd crates/desktop
-bun run typecheck     # tsc，strict + noUnusedLocals/Parameters
-bun run lint          # eslint --fix（@antfu + @eslint-react + better-tailwindcss）
+bun run typecheck
+bunx eslint .
+bun run format:check
+bun run generate:dto # when Rust DTOs changed
+bun run test:e2e -- <focused-spec>
+bun run build
 ```
-格式由仓库根 `./.prettierrc` 决定：**tab 缩进、tabWidth 4、printWidth 80、双引号、带分号、trailingComma all**。不要手动调格式，交给 prettier。
 
-职责分离：**格式归 prettier、ESLint 只管逻辑规则**（eslint 配置 `stylistic:false`）。别往 eslint 加样式类规则。
+Also run repository `just fmt` / `just lint` when their configured tooling is
+available. If a wrapper such as `nr` is unavailable, run the equivalent `bun`
+command and report the configuration mismatch; do not silently skip the check.
 
-## 数据层范式（最一致的骨架，优先遵守）
+Finish with `git diff`, a browser pass over the changed flow and its sibling,
+keyboard navigation, reduced motion, and both themes. Fix new warnings at the
+source.
 
-三层，新代码必须照此分层：
-1. `src/lib/api.ts`：`createApi(baseUrl, token)` 返回按资源分组的 ky 方法对象（`agents/skills/mcps/...`）。ky 在 `beforeError` 把后端 `{ error }` body 提到 `error.message`；慢接口显式给 `timeout`。
-2. `src/requests/<resource>.ts`：把请求包成工厂函数 `xxxQueryOptions(...)` / `xxxMutationOptions(...)`（用 `queryOptions`/`mutationOptions`），参数走解构对象 `{ api, queryClient, onSuccess? }`。失效逻辑集中成 `invalidateXxxQueries(queryClient)`。
-3. query key 全部在 `src/requests/keys.ts` 的 `queryKeys` 嵌套对象里，每个是 `() => [...] as const` 工厂，分 `all()/lists()/list(scope, projectRoot)/detail(...)` 层级，按前缀失效。
+Keep diagnostic screenshots in Playwright's per-test output directory with
+`testInfo.outputPath()` or omit them when they are not assertions. Never make a
+passing test create an untracked repository `artifacts/` directory. Run the
+frontend formatter from `crates/desktop` and inspect the resulting diff; root
+and package-local formatter versions can differ.
 
-组件里：`const api = useApi()` → `useQuery(skillListQueryOptions({ api }))`。
-
-- 本地持久化数据（store）也包一层 react-query（key 用普通数组如 `["projects"]`），用 `setQueryData` 乐观更新后再 `await save`。
-- DON'T：组件内联裸 `useQuery({ queryKey, queryFn })`；DON'T：手写请求类型——用生成的 DTO。
-
-## React 19 与 effect 纪律
-
-- **取数不用 `useEffect`**，用 react-query。**派生状态不用 effect**，用 `useMemo` 在 render 期算。**事件**命名 `handleXxx`。
-- `useEffect` 只留给真正的外部订阅：`invoke` 启后台服务、`window.addEventListener`/`matchMedia`、deep-link、driver.js——且都返回 cleanup。
-- 需要重置子状态时，优先 **lazy initial state**（`useState(() => ...)`）+ 父层给组件加 `key={...}` 重挂载，而不是 effect 同步。
-- 复杂多态状态用 `useReducer`，别堆一堆相互依赖的 `useState`。
-- context：`contexts/<name>.tsx` 放 `createContext` + value 类型 + props 类型 + 抛错守卫 `useXxxContext`；`providers/<name>.tsx` 放实际 Provider。用 React 19 写法：`use(Context)` 取值、context 直接当 provider（`<ServerContext value={...}>`，**不写 `.Provider`**）。
-- 项目装了 **React Compiler**（自动 memoization）。**不要为"防重渲染"手写 `useMemo`/`useCallback`**——编译器接管了；`useMemo` 只用于派生值语义或确需稳定引用时。render 阶段副作用（如 redirect）若被 react-compiler lint 拦，让位于 lint 用 effect，但默认方向是"能不用 effect 就不用"。
-- 多态 UI 用**判别联合**（`type Step = FeatureStep | WhatsNewStep | ConsentStep`）+ 纯函数 `buildXxx(ctx)` 构造序列，组件按 `step.type` 渲染，别堆相互依赖的 boolean 标志位。
-
-## 状态与持久化
-
-- 持久化用 Tauri `@tauri-apps/plugin-store`，**状态不引 zustand**（持久化靠 plugin-store，不是状态库；immer 只在个别组件用 `produce` 做局部不可变更新）。`src/lib/store/index.ts` 单例 `Store.load("store.json")`；每个 slice 一个文件导出 async `getXxx/saveXxx`，写完 `await s.save()`。
-- `src/lib/store.ts` 是 **barrel**，re-export `lib/store/*` 各 slice；消费方统一 `from "../lib/store"` 引多个 `getXxx/saveXxx`，不直接 import 具体 slice 文件。新 slice 记得挂到 barrel。
-- store 结构变更必须加版本迁移：`src/lib/store/migrations/vN-to-vN+1.ts` 一支一文件，`migrations/index.ts` 按 `version <` 串行执行，更新 `store/types.ts` 的 `CURRENT_VERSION`。
-- URL 状态用 nuqs `useQueryState`（选中项、tab 放 query string）。`NuqsAdapter` 已在 `App.tsx` 挂好。
-- 纯局部 UI 状态就地 `useState`，不要为它引全局 store。
-- 表单用 react-hook-form `useForm` + `Controller`，`mode: "onSubmit"` / `reValidateMode: "onChange"`，配 HeroUI `Form validationBehavior="aria"` + `FieldError`，校验消息走 `t(...)`。
-
-## 路由
-
-- 用 **wouter**：`<Router>` 包 `<Switch>` + `<Route path=...>`，页面放 `pages/`、default export、集中在 `App.tsx` 注册。编程式跳转 `const [, setLocation] = useLocation()`；外壳统一 `layouts/main-layout.tsx`。
-
-## HeroUI v3 与样式
-
-- 做任何 UI 前先取 HeroUI v3 API：用 `heroui-react` skill（`.heroui-docs/` 本地可能缺失，别依赖它）。你记忆里的 HeroUI v2 知识对本项目是错的。
-- 全部用 **compound components**（点号子组件）：`Modal.Backdrop/Container/Dialog/Header/Heading/Body/Footer`、`Card.Content/Title/Description`、`Tabs.List/Tab/Indicator/Panel`、`Switch.Control/Thumb`、`Tooltip.Trigger/Content`。不用 v2 的 flat props，不需要 `HeroUIProvider`，不用 framer-motion。
-- Modal / Card / Surface / Input / 次要按钮加 `variant="secondary"` 提升对比。
-- 颜色只用语义 token 类：`text-muted` / `text-danger` / `border-border` / `bg-surface-secondary` / `text-foreground/50` / `bg-accent/10`。**禁硬编码色阶**（`default-200`/`default-600` 这类要换成 `separator`/`muted`），**禁纯黑纯白**。语义 token 定义在 `src/styles/theme.css`。
-- 条件类名用 `cn`（`src/lib/utils.ts`，= `twMerge(clsx(...))`），写法 `cn("基础类", cond && "覆盖类")`。**禁用模板字符串拼 className**。`cn` 用**相对路径** import（`from "../lib/utils"`）——本仓库**没有 `@/` 别名**。
-- 告警/错误/状态块用设计系统组件（`Alert`、`Button`…），**不手搓 `<div className="border-warning/30 bg-warning/10">`**。
-
-## 错误处理
-
-- 统一走 HeroUI `toast`：`toast.success(t(...))` / `toast.danger(t(...))`（`Toast.Provider` 已全局挂载，勿重复添加）。成功/失败写在 mutation 的 `onSuccess`/`onError`，取消息用 `error instanceof Error ? error.message : String(error)`。
-- 批量操作（部分成功部分失败）：用 `onSettled` 或在 `onError` 分支里先 `invalidateXxxQueries` 再 toast，**不能让抛错跳过 `onSuccess` 把成功结果吞掉并停止刷新列表**。
-- DON'T：`{error && <div>{error.message}</div>}` 内联错误渲染。路由级渲染错误交给 `components/ui/error-boundary.tsx`（已包在每个 Route，勿重复包）。
-
-## 文件组织、命名、TS
-
-- 文件名一律 **kebab-case**（`agent-card.tsx`、`use-skill-install.ts`），无例外。
-- 组件一律 `export function Name()`，路由页 `export default function`；**禁箭头函数组件**（`const X = () => ...`）。hook 导 `useXxx`。
-- props 类型用 `interface XxxProps`（不用 `type`），紧贴组件、**不导出**（只有 context props 例外）。逻辑重的页面把 state+mutation+handler 抽进 colocated hook（`use-xxx-actions.ts` / `use-xxx.ts`），组件只渲染。
-- 复用组件 named export 放 `components/`；路由页 default export 放 `pages/`；跨页 hook 放 `hooks/`，页面专属 hook 放页面子目录 `hooks/`。纯函数 helper 抽同目录 `*-helpers.ts`（不带 JSX）。
-- 命名用领域词，禁 `Manager/Service/Handler/Helper` 泛化名。
-- TS：类型导入一律 `import type`；`strict` 全开；**禁 `any`**，不确定用 `unknown`。**尽量不用 `as` 断言绕类型**（`item as XxxResponse`）——优先修类型定义或 `unknown` + 收窄。生成的 DTO 从 `../generated/dto` 只做 type-only import，字段是 snake_case（`source_path`），**照用不改名，且不手改 `generated/`**。
-- Tauri 插件用顶部静态 ESM `import`，**禁 `await import("@tauri-apps/...")` 动态导入**。Tauri `invoke<T>("cmd", args)` 直接在调用点写，只用于原生命令；HTTP 业务一律走 ky/react-query，不走 invoke。
-
-## i18n
-
-- i18next + react-i18next，bundle 在 `src/lib/locales/{en,zh-Hans,zh-Hant}.ts`，扁平 `key→string`。组件里 `const { t } = useTranslation()`，key 用 **camelCase 语义化**（`subAgentCreated`、`validationProjectNameRequired`），插值 `t("detectedVia", { sources })`。
-- **所有用户可见文案**（含 toast、校验消息、aria-label）都过 `t()`，不硬编码；三个 locale 文件同步加 key。
-
-## 复用优先
-
-- 写新功能前先查现有 crate / 前端是否已具备该能力，**优先复用，别在新位置复制一份实现**。
-- DTO/model 只保留有实际消费方的字段，**不为"可能用得上"预留**。
-- 重复逻辑抽 hook（如 `use-multi-select`），重复组件合并，大文件按职责拆分，store 模块化。定期用 knip / react-doctor 扫死代码再删。
-- 能用平台原生/库标准件就别自造（如用 Tauri 原生窗口而非自绘标题栏）。
-- 小工具优先自实现、不为一个小函数拉 dep（如 semver 比较自己写）；纯数据/纯函数放**无 React import** 的 `lib/*.ts`，与组件渲染分离。
+For DnD geometry assertions, read the stable droppable slot wrapper rather than
+a child currently moving through a FLIP transition. Assert that preview,
+accessible announcement, cancel rollback, and committed order agree.
