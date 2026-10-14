@@ -2,13 +2,14 @@
 
 [![skills.sh](https://skills.sh/b/Fldicoahkiin/demo-video-skill)](https://skills.sh/Fldicoahkiin/demo-video-skill)
 
-An agent skill that turns a running web app into a **cinematic demo video** —
-real recorded interaction + local AI narration + word-synced captions + a quiet
-music bed, composed deterministically into an MP4. A hackathon structure is built
-in as a template; the pipeline works for any product/launch/demo video.
+An agent skill that turns a running app into a **cinematic demo video, fully
+automated** — up to the Screen Studio / Cap look: auto-zoom driven by what the
+choreography actually does, spring cursor with motion blur, padded wallpaper
+background. Real recorded interaction + local AI narration + word-synced
+captions + a quiet music bed, composed deterministically into an MP4.
 
-> Real interaction, not a slideshow. Local TTS, not cloud. Word-level captions,
-> not guessed timing. One landscape MP4 out.
+> Real interaction, not a slideshow. Zoom decided by semantics, not by hand.
+> Local TTS, not cloud. Word-level captions, not guessed timing. One MP4 out.
 
 ## Install
 
@@ -19,7 +20,7 @@ npx skills add Fldicoahkiin/demo-video-skill
 ## Pipeline
 
 ```
-① record    Playwright drives your live app, visible cursor → out/clips/*.webm
+① record    one of three engines (below)                    → out/*.mp4|webm
 ② narrate   per-scene VO → Kokoro TTS (local)               → narration/*.wav
 ③ transcribe Whisper word-level timestamps                  → *.transcript.json
 ④ caption   group into phrases + fix brand mishears         → captions.js
@@ -27,8 +28,20 @@ npx skills add Fldicoahkiin/demo-video-skill
 ⑥ compose   HyperFrames HTML one-timeline → render          → MP4
 ```
 
+Three recording engines, picked with you per project
+([details](references/screen-studio-look.md)):
+
+| Target | Engine | Look |
+|---|---|---|
+| Web/desktop app, macOS | **Cap CLI** | Screen Studio native — semantic auto-zoom, spring cursor + motion blur, wallpaper / rounding / shadow |
+| CLI tool | **VHS** | styled terminal mp4, deterministic |
+| Headless / CI | **Playwright** | synthetic cursor + ripples, runs anywhere |
+
 Recording and composition are independent — re-record one scene, or re-run
-narration, without redoing the other.
+narration, without redoing the other. Narration is one wav per scene, so any
+line can be swapped for a human take or another TTS without touching the rest.
+Everything in the stack is free to run (Cap is AGPL open source; licensing
+table in the reference).
 
 ## Quick start
 
@@ -68,8 +81,8 @@ Install the HyperFrames skills: `npx skills add heygen-com/hyperframes`.
 ```
 demo-video-skill/
 ├── SKILL.md                 # the workflow
-├── scripts/                 # record.mjs · tts.sh · transcribe.sh · build-captions.mjs · music.sh
-└── references/              # pipeline · recording · narration-and-captions · composition · templates · troubleshooting
+├── scripts/                 # record.mjs · record-cap.mjs · tts.sh · transcribe.sh · build-captions.mjs · music.sh
+└── references/              # pipeline · screen-studio-look · recording · narration-and-captions · composition · templates · troubleshooting
 ```
 
 ## License

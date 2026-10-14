@@ -32,6 +32,7 @@ A bare "Sample" with no `<note>` is ambiguous between 取样 and 样本 — flag
 Apple Developer documentation (developer.apple.com) is **English-only**, so capability / code-signing / API terms (Hardened Runtime, entitlements, QoS class names, dylib) have no *shipped-UI* zh-Hans to copy. That splits into two outcomes — don't lump them together:
 
 - **No settled zh term at all → flag.** **Hardened Runtime** (the code-signing capability in a Process Details / signing inspector): community uses both 强化运行时 and 加固运行时, neither official and neither dominant. Verify the absence, then flag: present "keep English / 强化运行时 / 加固运行时" and let the user pick. Don't confuse it with the Apple *Platform Security* guide's 运行时保护 — that is the kernel's KIP/APRR protection, a different concept.
+- **Audience decides → flag.** **Entitlements** in a code-signing inspector has no single shipped Apple zh-Hans label. `授权` is understandable for a general audience but can blur entitlements with authorization; developer-facing tools may keep `Entitlements`. Present both with the actual control context instead of caching one as universal.
 - **A settled WWDC rendering exists → use it, just cite provenance.** **QoS class names** (`QOS_CLASS_*`) → 用户交互 / 用户发起 / 实用工具 / 后台 / 默认, from Apple's WWDC subtitle localization. These are cached in terminology.md — **fill them directly, do not flag**; only note that the source is WWDC, not a shipped UI string, if asked.
 
 The test is whether a single settled Chinese rendering exists, not whether it came from a shipped UI. Flag only when the term is genuinely unsettled (Hardened) — a confidently-filled *unsettled* term is the "looks decisive, reads as guessed" failure; reflexively flagging a *settled* one (QoS) just nags the user.
@@ -58,6 +59,18 @@ Apple's current zh-Hans keeps **App** in English — "设定 App 和服务", "�
 ## Trash → 废纸篓, not 垃圾桶 / 回收站
 
 Apple macOS: **废纸篓**. "Move to Trash" → **移到废纸篓**, "Empty Trash" → **清倒废纸篓** (清倒, not 清空). 垃圾桶 / 回收站 are the Windows/Android habits — wrong for macOS. (Same page also confirms Dock → 程序坞, "Put Back" → 放回原处.)
+
+## Bars → 条形图, not 进度条
+
+When `Bars` names a chart style, use **条形图**. A **进度条** is a progress
+indicator and describes a different control. Read the note before choosing:
+an individual graphical bar can be 条形, while the chart type is 条形图.
+
+## System-wide → 系统范围的, not 系统级
+
+Use **系统范围的** when `system-wide` says that a measurement or action covers
+the entire system. **系统级** means system-level and changes scope into a
+hierarchy or implementation-layer claim.
 
 ## "..." → "…"
 

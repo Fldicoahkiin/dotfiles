@@ -1,14 +1,16 @@
 ---
 name: demo-video-skill
 description: >
-  Produce a cinematic product/demo video from a live web app. Playwright records
-  real on-screen interactions with a visible synthetic cursor; local Kokoro TTS
-  narrates; Whisper builds word-synced captions; a HyperFrames HTML composition
-  assembles the clips, voice, captions and a music bed into an MP4. Use when the
-  user wants to make a demo video, product walkthrough, screen-recorded demo,
-  hackathon submission video, launch clip, or "record my app with narration and
-  captions". Outputs a single landscape MP4; a hackathon structure is built in as
-  a template.
+  Produce a cinematic product/demo video from a live app, fully automated — up
+  to the Screen Studio / Cap look: auto-zoom on clicks, spring cursor with
+  motion blur, padded wallpaper background with rounded corners and shadow.
+  Three recording engines: Cap CLI (flagship, macOS — the look is native),
+  charmbracelet VHS (CLI-tool demos), Playwright (headless fallback, synthetic
+  cursor). Local Kokoro TTS narrates; Whisper builds word-synced captions; a
+  HyperFrames HTML composition assembles clips, voice, captions and a music bed
+  into an MP4. Use when the user wants a demo video, product walkthrough,
+  screen-recorded demo, hackathon video, launch clip, "record my app with
+  narration and captions", or a Screen-Studio-style auto-edited recording.
 ---
 
 # Demo Video Studio
@@ -27,7 +29,7 @@ captions. Records a deployed URL or a local dev server.
 ## Pipeline
 
 ```
-① record    Playwright drives your live app, visible cursor → out/clips/*.webm
+① record    one of three engines (below)                    → out/*.mp4|webm
 ② narrate   write VO per scene → Kokoro TTS (local)         → narration/*.wav
 ③ transcribe Whisper word-level timestamps                  → *.transcript.json
 ④ caption   group into phrases + fix brand mishears         → captions.js
@@ -35,12 +37,30 @@ captions. Records a deployed URL or a local dev server.
 ⑥ compose   HyperFrames HTML one-timeline: clips+voice+captions+music → MP4
 ```
 
-Recording and composing are independent: re-record one scene, or re-run
-narration, without redoing the other. A code-generated GIF track (HTML scenes
-rendered straight to MP4, no recording) is an optional side path for doc pages.
+**① has three engines — pick by target**
+([references/screen-studio-look.md](references/screen-studio-look.md)):
+
+| Target | Engine | Look |
+|---|---|---|
+| Web/desktop app, macOS | **Cap CLI** — `scripts/record-cap.mjs` | Screen Studio native: auto-zoom from real clicks, spring cursor + motion blur, wallpaper / rounding / shadow, GPU-rendered |
+| CLI tool | **VHS** tape → mp4 | styled terminal (padding, margin fill, border radius, window bar), deterministic |
+| Headless / CI / Linux | **Playwright** — `scripts/record.mjs` | synthetic cursor + ripples; writes `<scene>.events.json` (timestamps + coords) for any later zoom compositing |
+
+Whatever engine records, its output is just the *clip* feeding ②–⑥ — recording
+and composing stay independent: re-record one scene, or re-run narration,
+without redoing the other. A code-generated GIF track (HTML scenes rendered
+straight to MP4, no recording) is an optional side path for doc pages.
 
 ## Workflow
 
+0. **Pick the engine WITH the user — never silently.** Look at the actual
+   project (web app? CLI? desktop? does this machine have a GUI session? does it
+   need to run in CI?), then present the engine options **with pros/cons for
+   this specific project** and let the user choose. E.g. for a web app on a Mac:
+   "Cap CLI gives the Screen Studio look natively but needs screen-recording
+   permission and a first-run calibration; Playwright runs anywhere and re-records
+   single scenes fast but has no auto-zoom; VHS doesn't apply here." Engine
+   details: [references/screen-studio-look.md](references/screen-studio-look.md).
 1. **Understand the product first.** Read its README / demo docs. Write a Demo
    Flow before touching the tools: problem → product walkthrough → evidence →
    conclusion. Pick the recommended click-path and the visible result each scene
@@ -50,9 +70,16 @@ rendered straight to MP4, no recording) is an optional side path for doc pages.
    scale. `node scripts/record.mjs [scene]`. Engine + worked example:
    [references/recording.md](references/recording.md).
 3. **Narrate → caption.** Write one `assets/narration/NN-*.txt` per scene in VO
-   voice (you're talking to a viewer, not reading a README). Then:
+   voice (you're talking to a viewer, not reading a README — this is a different
+   craft from marketing copy; the marketing skill supplies topic/hook/storyboard,
+   this skill writes the spoken words). Then:
    `bash scripts/tts.sh && bash scripts/transcribe.sh && node scripts/build-captions.mjs`.
-   Edit `PHRASE_FIX` in `build-captions.mjs` for your brand names. Guide:
+   Edit `PHRASE_FIX` in `build-captions.mjs` for your brand names.
+   **The voice is swappable by contract**: narration is one wav per scene
+   (`narration/NN-*.wav`) — replace any wav with a human take, a 剪映 dub, or
+   another TTS, re-run transcribe+captions, recompose; nothing else changes.
+   Kokoro (local, Apache-2.0) is the default and has Mandarin voices; edge-tts is
+   a free online alternative. Guide:
    [references/narration-and-captions.md](references/narration-and-captions.md).
 4. **Compose & render.** Start from
    [references/composition-skeleton.html](references/composition-skeleton.html)
@@ -99,12 +126,17 @@ First TTS downloads ~340 MB (Kokoro), first transcribe ~466 MB (Whisper
 
 Node 22+, FFmpeg, Playwright (Chromium), and the HyperFrames CLI (`npx
 hyperframes`, install its skills with `npx skills add heygen-com/hyperframes`).
-Local TTS/Whisper need Python + `kokoro-onnx`. See
+Local TTS/Whisper need Python + `kokoro-onnx`. Per engine (optional): the Cap
+route needs `cap` (`curl -fsSL https://cap.so/install-cli.sh | sh`) + `cliclick`
+(`brew install cliclick`) + screen-recording permission; the terminal route
+needs `vhs` (`brew install vhs`). All free — licensing table in
+[references/screen-studio-look.md](references/screen-studio-look.md). See
 [references/composition.md](references/composition.md) for the HyperFrames setup.
 
 ## References
 
 - [references/pipeline.md](references/pipeline.md) — the six stages and data flow
+- [references/screen-studio-look.md](references/screen-studio-look.md) — the three recording engines; Cap CLI lifecycle, zoom clustering, VHS tapes, what not to build on
 - [references/recording.md](references/recording.md) — Director engine + worked example + recording pitfalls
 - [references/narration-and-captions.md](references/narration-and-captions.md) — VO writing, TTS, Whisper, caption fixes
 - [references/composition.md](references/composition.md) — HyperFrames timeline, crossfades, 1080p, rendering

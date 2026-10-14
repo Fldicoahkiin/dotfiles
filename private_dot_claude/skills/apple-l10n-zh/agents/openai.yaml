@@ -1,0 +1,4 @@
+interface:
+  display_name: "Apple 简体中文本地化"
+  short_description: "Translate Apple UI into verified zh-Hans terminology"
+  default_prompt: "Use $apple-l10n-zh to translate this Apple-platform interface into Simplified Chinese and validate its localization file."

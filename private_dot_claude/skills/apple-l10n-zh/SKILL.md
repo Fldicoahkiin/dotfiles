@@ -1,19 +1,15 @@
 ---
 name: apple-l10n-zh
-description: Use before translating any macOS or iOS app interface into Simplified Chinese (zh-Hans / 简体中文) — even a single button or menu label. Apple ships its own Chinese for UI (Save = 存储 not 保存, Copy = 拷贝 not 复制, chart Series = 序列 not 系列, plus Finder = 访达, Force Quit, Sockets, Resident Memory…), so don't translate from general knowledge — find each term in Apple's official zh-CN sources and pick it by the control's actual function, because a guess reads as machine translation. Triggers on a .xcstrings, .xliff, or .xcloc file, filling in target translations, a zh-Hans translation PR for a Mac/iPhone app, choosing the Apple-conventional Chinese for SwiftUI/Xcode buttons, menus, or labels, or keeping placeholders like %@, %lld, %1$@ intact. Gives the workflow to verify terms against Apple docs and flag disputed ones to the user, a cached glossary of already-verified terms and known traps, CJK punctuation and spacing rules, and a bulk target-injection script with placeholder-parity checks. Not for web/i18next/JSON localization, English copywriting or release notes, App Store screenshot uploads, or Simplified-to-Traditional conversion.
+description: Translate macOS and iOS interface strings into Simplified Chinese (zh-Hans) using Apple terminology and Xcode localization formats. Use for .xcstrings, .xcloc, or .xliff files; zh-Hans translation PRs; SwiftUI or Xcode buttons, menus, labels, process and memory UI; and placeholder-safe translations containing %@, %lld, or positional specifiers. Verify ambiguous terms against Apple's live UI or zh-CN docs, preserve code tokens and placeholders, and flag terms with no settled Apple rendering. Not for web JSON or i18next localization, copywriting, release notes, App Store assets, or Simplified-to-Traditional conversion.
 ---
 
 # Apple App Localization → Simplified Chinese
 
 Translate Apple-platform (macOS / iOS) UI strings into Simplified Chinese (zh-Hans) so the result reads like a native Apple app: Apple's official terminology, intact format placeholders, and the Xcode String Catalog file workflow. Output language is **zh-Hans**; the source is usually English but may be any language.
 
-## When to use
+## File workflow
 
-- Editing a `<lang>.xliff` exported from an `.xcloc` localization catalog
-- Adding zh-Hans values to a `.xcstrings` String Catalog
-- Choosing the Apple-official Chinese term for a macOS/iOS UI concept
-
-## File workflow (.xcloc / .xliff / .xcstrings)
+### Exported `.xcloc` catalog
 
 An `.xcloc` localization catalog has two sides:
 
@@ -34,9 +30,31 @@ Translate by adding a `<target>` after each `<source>`:
 
 - Mark a finished translation `state="translated"` (Xcode shows it as done). A unit with no `<target>` falls back to the source at runtime — nothing breaks, so leaving a string untranslated is safe.
 - Leave brand names and empty-source units alone (e.g. `CFBundleName`, copyright).
-- The maintainer merges `<target>`s back into the real String Catalog with `xcodebuild -importLocalizations`. You only ever edit the xliff; never touch `Source Contents`.
+- The maintainer merges `<target>`s back into the real String Catalog with `xcodebuild -importLocalizations`. In an exported `.xcloc`, edit only the xliff; never touch `Source Contents`.
 - **Always read each unit's `<note>`** — it gives the real UI context and frequently decides the correct term.
 - **Plural strings** (String Catalog `%#@…@` variations) export as separate trans-units with ids like `key|==|plural.other`. zh-Hans has a single CLDR plural category — translate only the `plural.other` unit (keep the `%#@…@` / `%lld` tokens intact); `plural.one` / `few` / `many` don't apply to Chinese.
+
+### Standalone `.xcstrings` catalog
+
+When the repository owns the actual String Catalog rather than an exported
+`.xcloc`, add or update `localizations.zh-Hans` in the `.xcstrings` file. Keep
+comments, variation structures, extraction state, and unknown fields intact.
+
+```json
+"Save" : {
+  "localizations" : {
+    "zh-Hans" : {
+      "stringUnit" : {
+        "state" : "translated",
+        "value" : "存储"
+      }
+    }
+  }
+}
+```
+
+For plurals and device variations, add zh-Hans values inside the existing
+`variations` shape instead of replacing it with a `stringUnit`.
 
 ## Translation workflow (per string)
 
@@ -78,15 +96,18 @@ The cases where the obvious translation is wrong: [reference/pitfalls.md](refere
 
 ## Validation
 
-After editing the xliff, run this loop until clean:
+After editing, run the checks that match the file type:
 
 ```
 - [ ] XML is well-formed:      xmllint --noout <file>.xliff
+- [ ] JSON is well-formed:     plutil -lint <file>.xcstrings
 - [ ] Placeholder parity:      each <target> has the same specifiers as its <source>
 - [ ] Spot-check terminology:  against reference/terminology.md
 ```
 
-For bulk work, `scripts/inject_targets.py` inserts `<target>`s from an id→translation JSON map and reports any placeholder mismatch. Run it, then run `xmllint`:
+For bulk XLIFF work, `scripts/inject_targets.py` inserts missing `<target>`s
+from an id→translation JSON map. It leaves existing targets unchanged and does
+not write the file if placeholder validation fails. Run it, then run `xmllint`:
 
 ```bash
 python3 scripts/inject_targets.py path/to/zh-Hans.xliff path/to/translations.json

@@ -56,6 +56,13 @@ class Director {
     this.page = page;
     this.x = SIZE.width / 2;
     this.y = SIZE.height / 2;
+    // event log: written next to the clip as <scene>.events.json — the script IS
+    // the event source (timestamps + coords), for any later zoom/pan compositing.
+    this.events = [];
+    this.t0 = Date.now();
+  }
+  log(type, extra = {}) {
+    this.events.push({ type, t: (Date.now() - this.t0) / 1000, x: Math.round(this.x), y: Math.round(this.y), ...extra });
   }
   async glideTo(x, y, ms = 650) {
     const steps = Math.max(12, Math.round(ms / 16));
@@ -80,10 +87,12 @@ class Director {
     // real click on the element (full event pipeline — needed for component
     // libraries that use Popover/Select); the cursor already glided for the camera.
     await el.click({ delay: 70, force });
+    this.log("click", { selector });
   }
   async type(selector, text, { perChar = 55 } = {}) {
     await this.click(selector);
     for (const ch of text) { await this.page.keyboard.type(ch); await sleep(perChar); }
+    this.log("type", { selector, chars: text.length });
   }
   /** Close an open dialog by clicking its close affordance. Many component
    *  libraries trap or ignore Escape, so prefer clicking the button. Adjust the
@@ -206,7 +215,8 @@ for (const name of names) {
   await context.close();
   const path = await video.path();
   renameSync(path, join(CLIPS, `${name}.webm`));
+  writeFileSync(join(CLIPS, `${name}.events.json`), JSON.stringify(d.events, null, 2));
   await browser.close();
-  console.log(`  ✓ out/clips/${name}.webm`);
+  console.log(`  ✓ out/clips/${name}.webm (+events.json)`);
 }
 console.log("done:", readdirSync(CLIPS).join(", "));

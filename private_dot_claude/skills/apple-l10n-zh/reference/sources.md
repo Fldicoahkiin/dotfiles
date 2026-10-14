@@ -17,12 +17,14 @@ Order of authority: the **live macOS system UI** in Simplified Chinese > Apple's
 
 ## Apple — domain terminology (zh-CN guides)
 
-- Activity Monitor User Guide — memory terms (内存 / 常驻 / 虚拟 / 联动 / 已使用的交换) — https://support.apple.com/zh-cn/guide/activity-monitor/view-memory-usage-actmntr1004/mac
+- Activity Monitor User Guide — memory terms (App 内存 / 联动内存 / 被压缩 / 已缓存文件 / 已使用的交换) — https://support.apple.com/zh-cn/guide/activity-monitor/actmntr1004/mac
 - Activity Monitor User Guide — process info — https://support.apple.com/zh-cn/guide/activity-monitor/view-information-about-processes-actmntr1001/mac
 - Activity Monitor User Guide — diagnostics: 取样进程 (Sample Process) — https://support.apple.com/zh-cn/guide/activity-monitor/actmntr2225/mac
-- Numbers 使用手册 — chart "数据序列" (Series) — https://support.apple.com/zh-cn/guide/numbers/welcome/mac
+- Numbers 使用手册 — chart "数据序列" (Series) — https://support.apple.com/zh-cn/guide/numbers/tan72719392/mac
+- Numbers 使用手册 — 条形图 (Bar chart) — https://support.apple.com/zh-cn/guide/numbers/-tan727160fa/mac
 - macOS User Guide — Finder/Dock terms: 废纸篓 (Trash) / 移到废纸篓 / 清倒废纸篓 / 程序坞 (Dock) — https://support.apple.com/zh-cn/guide/mac-help/mchlp1093/mac
 - iPhone User Guide (zh-CN) — "App" kept untranslated in shipped UI — https://support.apple.com/zh-cn/guide/iphone/welcome/ios
+- Apple Support — system-wide scope rendered as 系统范围的 — https://support.apple.com/zh-cn/102029
 
 ## Cross-check only (not Apple)
 

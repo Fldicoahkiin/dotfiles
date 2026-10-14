@@ -40,6 +40,7 @@ A **verified cache** of Apple's official zh-Hans terms for common macOS/iOS UI c
 |---|---|---|
 | About X | 关于 X | |
 | App / Apps | App | keep English, not 应用/应用程序; plural is bare "App" too (退出所有 App) — see pitfalls |
+| Dock | 程序坞 | Apple macOS term; do not leave "Dock" in user-facing Chinese |
 | Documentation | 文档 | not 文稿 |
 | Settings / Preferences | 设置 / 偏好设置 | macOS 13+ uses 设置 |
 | Inspector | 检查器 | |
@@ -72,13 +73,16 @@ A **verified cache** of Apple's official zh-Hans terms for common macOS/iOS UI c
 | Footprint | 内存占用 | |
 | Page-ins | 页面调入 | |
 | Wired Memory | 联动内存 | Apple official |
+| App Memory | App 内存 | Apple Activity Monitor |
 | Compressed | 被压缩 | Apple official |
+| Cached Files | 已缓存文件 | Apple Activity Monitor |
 | Swap Used | 已使用的交换 | Apple official |
 | Sockets | 套接字 | |
 | Signature | 签名 | code signature |
-| Entitlements | 授权 | or keep "Entitlements" for dev audiences |
+| Entitlements | flag | no single shipped Apple zh-Hans term; explain the code-signing context and ask whether to keep English or use 授权 |
 | Priority / Nice | 优先级 / Nice | keep Nice (Unix term) |
 | Sample Process | 取样进程 | the "Sample" action; 取样, not 样本 (a data point) — see pitfalls |
+| System-wide | 系统范围的 | describes scope; not 系统级 (system-level) |
 | Hardened (Runtime) | flag / keep English | no settled zh term (dev docs are EN-only); community 强化运行时/加固运行时 compete — flag, see pitfalls |
 | QoS: User Interactive / User Initiated / Utility / Background / Default | 用户交互 / 用户发起 / 实用工具 / 后台 / 默认 | fill directly; settled WWDC-localized renderings (not shipped UI, but not a flag case) |
 
@@ -87,6 +91,7 @@ A **verified cache** of Apple's official zh-Hans terms for common macOS/iOS UI c
 | English | zh-Hans | Note |
 |---|---|---|
 | Series | 序列 | Apple Numbers 数据序列 — not Excel 系列 |
+| Bar chart | 条形图 | Apple Numbers; a chart style is not a progress bar |
 | Value | 值 | |
 | Time | 时间 | |
 | Timeline | 时间线 | |
