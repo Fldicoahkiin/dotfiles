@@ -2,7 +2,7 @@
 
 Scan a web project for **AI slop**, the generic machine-default visual and copy
 tics of vibe-coded products, and strip it out. This skill turns the catalogue at
-**[killaislop.com](https://killaislop.com)** into action: it detects 32 tells
+**[killaislop.com](https://killaislop.com)** into action: it detects 35 tells
 from their code-level signals, explains why each reads as machine-made, and
 proposes or applies the clean fix.
 
@@ -11,13 +11,16 @@ palette, one-hue status boxes, atmospheric background gradients, serif-italic
 emphasis, decorative strikes/highlights, highlighted keywords, AI copywriting
 voice, emoji spam, glowing status dots, colored-left-border callouts, pastel
 icon tiles, glassmorphism and over-rounding, oversized drop shadows, corners
-that don't nest, badge & pill spam, AI-drawn SVG icons, icon-in-a-tint-of-itself
+that don't nest, borders that die at rounded corners, badge & pill spam,
+AI-drawn SVG icons, icon-in-a-tint-of-itself
 tiles, kickers over every heading, full-sentence display headlines, flat type
-hierarchies, springy hover effects, all-caps stat-card grids, invented stat
+hierarchies, springy hover effects, wobbling off-centre spinners, all-caps
+stat-card grids, invented stat
 rows, 01/02/03 section markers, cards nested in cards, monotone one-gap
-spacing, the default Inter/Space Grotesk look, and the "tasteful terminal"
-default. It works across HTML/CSS, React/Vue/Svelte/Astro, Tailwind, and
-Markdown copy.
+spacing, the default Inter/Space Grotesk look, the "tasteful terminal"
+default, and the editorial-serif dashboard costume. It works across
+HTML/CSS, React/Vue/Svelte/Astro, Tailwind, PHP/Twig
+templates (WordPress themes and plugins included), and Markdown copy.
 
 ## Install — just ask your agent
 
@@ -81,12 +84,30 @@ Every hit is a lead to confirm by reading the code, not a verdict. A gradient, a
 serif, or an emoji can be a real, defended choice. The skill flags defaults and
 keeps anything you clearly decided.
 
+For hits you've confirmed as intentional, and for narrower scans, the scanner
+supports:
+
+```bash
+node scripts/scan.mjs src --only=01,06        # scan just these tells
+node scripts/scan.mjs src --skip=19,26        # everything but these
+node scripts/scan.mjs src --exclude=legacy    # drop paths (substring match)
+node scripts/scan.mjs src --rules=my.mjs      # load extra project/language tells
+```
+
+and comment directives in source: `deslop-ignore` (this line),
+`deslop-ignore-next-line`, and `deslop-ignore-file` — each optionally scoped to
+tell ids, e.g. `/* deslop-ignore-next-line 06 */`. Prefer the id-scoped forms so
+new tells still surface. `scripts/rules.ru.mjs` ships as a working example of a
+`--rules` module (Russian AI-copywriting tells) and the template for your own
+language- or stack-specific rules.
+
 ## What's inside
 
 | File | |
 |---|---|
 | `SKILL.md` | The skill definition, workflow, and guardrails. |
-| `references/taxonomy.md` | The 32 tells: what each is, why it's slop, the fix. |
+| `references/taxonomy.md` | The 35 tells: what each is, why it's slop, the fix. |
 | `references/detection.md` | The code patterns per tell, and their false positives. |
 | `references/fixes.md` | Before→after remediation patterns. |
 | `scripts/scan.mjs` | The dependency-free scanner. |
+| `scripts/rules.ru.mjs` | Example `--rules` module: Russian copy tells. |

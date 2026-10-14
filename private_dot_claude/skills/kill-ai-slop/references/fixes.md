@@ -209,14 +209,27 @@ inner element at all.
 + <div class="rounded-2xl p-3"><div class="rounded-lg">…</div></div>   /* 16 − 12 ≈ 8 */
 ```
 
-### 22 Badge & pill spam
+### 22 Border that dies at the corner
+Put the radius and the border on the same box; never let a clip eat a stroke.
+```diff
+- <div class="rounded-xl overflow-hidden">      /* wrapper owns the radius… */
+-   <table class="border divide-y">…</table>    /* …child owns the stroke — erased at every corner */
+- </div>
++ <div class="rounded-xl overflow-hidden border border-[--rule]">  /* same box: the stroke wraps the arc */
++   <table class="divide-y">…</table>
++ </div>
+```
+Or keep the hairlines as dividers: run them straight, edge to edge, and drop
+the radius from the fill — square-cornered regions need no arc.
+
+### 23 Badge & pill spam
 Delete decorative pills; keep at most a real status tag.
 ```diff
 - <h1>Dashboard</h1><Pill>✨ New</Pill><Pill>🔥 Popular</Pill><Pill>β Beta</Pill>
 + <h1>Dashboard</h1><span class="ver">v2.1</span>
 ```
 
-### 23 AI-drawn SVG icons
+### 24 AI-drawn SVG icons
 Get a real, high-quality icon: commission a designer, or generate one with the
 best image model and refine it until it's crisp and on-brand.
 ```diff
@@ -226,7 +239,7 @@ best image model and refine it until it's crisp and on-brand.
 Don't ship the crude blob the model sketched, and don't fall back to a bare
 letter; a crude generated icon is worse than no picture at all.
 
-### 24 Icon in a tint of itself
+### 25 Icon in a tint of itself
 Let the icon inherit the text color with no container; if it truly needs one,
 give it a deliberate opaque surface.
 ```diff
@@ -234,7 +247,7 @@ give it a deliberate opaque surface.
 + <Icon class="text-[--ink]"/>          /* just an icon; no tinted tile */
 ```
 
-### 25 The springy hover
+### 26 The springy hover
 Transition only the properties that carry the state change, at 120–200ms with a
 standard ease; hover feedback is a surface shift, not growth.
 ```diff
@@ -244,7 +257,22 @@ standard ease; hover feedback is a surface shift, not growth.
 Never animate layout properties (width/height/margin/padding); save spring
 easing for things that genuinely move through space.
 
-### 26 The all-caps card grid
+### 27 The wobbling spinner
+Give the rotation a fixed centre; never put centering and spinning in the same
+`transform` — a keyframe replaces the whole property.
+```diff
+- .spinner { position: absolute; top: 50%; left: 50%;
+-   transform: translate(-50%, -50%); animation: spin 1s linear infinite; }
+- @keyframes spin { to { transform: rotate(360deg); } }  /* clobbers the translate */
++ .spinner-box { position: absolute; inset: 0; display: grid; place-items: center; }
++ .spinner { animation: spin 1s linear infinite; }       /* rotates in place */
+```
+Centre the artwork too: the SVG arc centred on its viewBox, `transform-origin`
+left at center (or use the standalone `rotate` property, which composes with
+`translate` instead of replacing it). Then watch one full revolution before
+moving on.
+
+### 28 The all-caps card grid
 Replace the grid of equal-weight cards with the single most important point,
 told fully; drop the ALL-CAPS micro-labels.
 ```diff
@@ -254,7 +282,7 @@ told fully; drop the ALL-CAPS micro-labels.
 + three-line summary.</p>
 ```
 
-### 27 The invented stat row
+### 29 The invented stat row
 Keep only measured, sourced numbers; delete the set dressing.
 ```diff
 - <div class="stats"><b>10k+</b> Developers <b>99.9%</b> Uptime <b>24/7</b> Support</div>
@@ -263,7 +291,7 @@ Keep only measured, sourced numbers; delete the set dressing.
 One real, checkable figure beats three round ones. No numbers yet? Say what the
 product does instead.
 
-### 28 The 01 / 02 / 03 section markers
+### 30 The 01 / 02 / 03 section markers
 Delete ornamental ordinals on unordered sections; number only real sequences.
 ```diff
 - <span class="text-8xl font-extrabold text-gray-100">01</span><h2>Collaborate</h2>
@@ -272,7 +300,7 @@ Delete ornamental ordinals on unordered sections; number only real sequences.
 ```
 Install steps, changelogs, and catalogues have earned their numbers; keep those.
 
-### 29 Cards inside cards
+### 31 Cards inside cards
 One surface per region; group inside it with spacing and hairlines.
 ```diff
 - <div class="card"><div class="card"><div class="card">Pro — $8/mo</div></div></div>
@@ -285,7 +313,7 @@ One surface per region; group inside it with spacing and hairlines.
 A child keeps its own surface only when it's genuinely a separate object (a
 preview, an embed).
 
-### 30 One gap everywhere
+### 32 One gap everywhere
 Space by relationship: pull a heading toward its own rows, push groups apart.
 ```diff
 - <div class="space-y-4">
@@ -301,7 +329,7 @@ Space by relationship: pull a heading toward its own rows, push groups apart.
 ```
 Use a small scale with real jumps (4/8/16/32/64), unevenly on purpose.
 
-### 31 Inter everywhere
+### 33 Inter everywhere
 Choose a face like you'd choose a logo: try a few, set your own copy in each,
 and be able to say why this one.
 ```diff
@@ -314,7 +342,7 @@ Landing back on Inter after comparing is a choice; starting there isn't. A
 system stack picked for a reason is a choice too. Propose candidates; let the
 user pick — never swap a brand font silently.
 
-### 32 The tasteful terminal
+### 34 The tasteful terminal
 Move monospace back to code; use terminal metaphors only where they serve the
 product.
 ```diff
@@ -324,4 +352,17 @@ product.
 -          ╚══════════════╝</pre>
 + <body class="font-sans bg-[--bg] text-[--ink]">
 +   <h1>Welcome</h1>          /* mono stays in <code>/<pre> for actual code */
+```
+
+### 35 The editorial dashboard
+Type follows the job: sans + tabular lining numerals for scanned surfaces;
+serif display only where the surface is genuinely editorial.
+```diff
+- <h1 class="font-serif text-5xl text-emerald-950">Good evening, Mara.</h1>
+- <p class="italic font-serif text-emerald-800/70">The quiet rhythm of your services.</p>
+- <div class="stat font-serif text-4xl">3</div>
++ <header class="flex items-baseline justify-between">
++   <h1 class="text-sm font-semibold">On-call — payments</h1><time>22:41 UTC</time>
++ </header>
++ <div class="stat text-3xl font-bold tabular-nums">3</div>
 ```
